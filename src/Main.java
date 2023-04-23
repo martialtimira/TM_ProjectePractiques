@@ -11,7 +11,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
 
         String zipFilePath = "Cubo.zip";
-
+        Visor visor = null;
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFilePath))) {
 
             ZipEntry entry;
@@ -23,9 +23,14 @@ public class Main {
                     // Creem un objecte BufferedImage a partir de l'entrada ZIP
                     BufferedImage image = ImageIO.read(zis);
 
-                    // Mostrem la imatge
-                    Visor visor = new Visor(image);
-                    visor.setVisible(true);
+                    // Mostrem la imatge. En cas de que sigui la 1era, inicialitzem Visor, si no, actualitzem la imatge
+                    if (visor == null) {
+                        visor = new Visor(image);
+                        visor.setVisible(true);
+                    }
+                    else {
+                        visor.update_image(image);
+                    }
 
                 }
 
