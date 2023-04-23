@@ -27,6 +27,10 @@ public class Visor extends JFrame {
 
     }
 
+    /**
+     * Actualitza la imatge mostrada en el visor
+     * @param imagen Nova imatge a mostrar
+     */
     public void update_image(BufferedImage imagen) {
         if (imagen != null) {
             ImageIcon icono = new ImageIcon((Image) imagen);
