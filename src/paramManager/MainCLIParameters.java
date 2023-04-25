@@ -40,7 +40,7 @@ public class MainCLIParameters {
     @Parameter(names = {"--fps"},
             validateWith = PositiveIntegerValidation.class,
             description = "<value> : Nombre d’imatges per segon amb les quals és reproduirà el vídeo.")
-    private Integer fps;
+    private int fps;
 
     // TODO: Introduir paràmetres pels filtres que implementem
 
@@ -77,4 +77,9 @@ public class MainCLIParameters {
      * @return Si el codi s'està executant amb la funció de mostrar les opcions d'execució.
      */
     public boolean isHelp(){return help;}
+
+    public Path getInputPath() {return input;}
+
+    public int getFps() {return fps;}
 }
+

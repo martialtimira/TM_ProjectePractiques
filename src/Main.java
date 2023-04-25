@@ -3,6 +3,9 @@ import paramManager.MainCLIParameters;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.file.Path;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.zip.*;
 import javax.imageio.ImageIO;
 
@@ -17,6 +20,9 @@ public class Main {
      * Instància dels paràmetres d'entrada del terminal.
      */
     final MainCLIParameters mainArgs = new MainCLIParameters();
+    private Visor visor;
+
+    private ZipInputStream input_stream;
 
     /**
      * Mètode principal del programa. Crea una instància de la classe Main, gestiona els arguments d'entrada,
@@ -73,36 +79,50 @@ public class Main {
     void run() throws IOException {
         // De moment ho poso aqui pk corri
         // ideal-ment s'hauria de moure a una altra classe
-        String zipFilePath = "Cubo.zip";
-        Visor visor = null;
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFilePath))) {
-
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-
-                // Només llegim les entrades que són fitxers
-                if (!entry.isDirectory()) {
-
-                    // Creem un objecte BufferedImage a partir de l'entrada ZIP
-                    BufferedImage image = ImageIO.read(zis);
-
-                    // Mostrem la imatge. En cas de que sigui la 1era, inicialitzem Visor, si no, actualitzem la imatge
-                    if (visor == null) {
-                        visor = new Visor(image);
-                        visor.setVisible(true);
-                    }
-                    else {
-                        visor.update_image(image);
-                    }
-
-                }
-
-                // Indiquem que hem acabat de llegir aquesta entrada
-                zis.closeEntry();
-
-            }
-
+        visor = null;
+        int fps = mainArgs.getFps();
+        if(fps == 0) {
+            fps = 24;
         }
+
+
+        Timer timer = new Timer();
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                ZipEntry entry;
+                Path file_path = mainArgs.getInputPath();
+                if(input_stream == null) {
+                    try {
+                        input_stream = new ZipInputStream(new FileInputStream(file_path.toString()));
+                    } catch (FileNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                try {
+                    entry = input_stream.getNextEntry();
+                    if(entry != null) {
+                        if(!entry.isDirectory()) {
+                            BufferedImage image = ImageIO.read(input_stream);
+
+                            if(visor == null) {
+                                visor = new Visor(image);
+                                visor.setVisible(true);
+                            }
+                            else {
+                                visor.update_image(image);
+                            }
+                        }
+                    }
+                    // Indiquem que hem acabat de llegir aquesta entrada
+                    input_stream.closeEntry();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+
+        timer.schedule(task, 0, 1000/fps);
 
     }
 }
