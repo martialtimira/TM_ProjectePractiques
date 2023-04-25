@@ -54,6 +54,9 @@ public class Main {
      *         Si hi ha hagut algun error durant l'execució.
      */
     public static void main(String[] args) throws IOException {
+        args = new String[2];
+        args[0] = "-i";
+        args[1] = "Cubo.zip";
         Main app = new Main();
         app.handleInputArgs(args);
         app.run();
