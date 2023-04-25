@@ -1,17 +1,19 @@
-import java.awt.BorderLayout;
-import java.awt.Image;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-
+/**
+ * Classe encarregada de mostrar la seqüència d'imatges,
+ * extent JFrame.
+ */
 public class Visor extends JFrame {
 
-    BufferedImage imagen;
     JLabel lblImageHolder;
 
+    /**
+     * Constructor de la classe.
+     * @param imagen Imatge inicial que es mostrarà al panell.
+     */
     public Visor(BufferedImage imagen) {
 
         JPanel contentPane = new JPanel();

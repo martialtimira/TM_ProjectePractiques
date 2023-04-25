@@ -1,13 +1,16 @@
 import com.beust.jcommander.JCommander;
 import paramManager.MainCLIParameters;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.zip.*;
-import javax.imageio.ImageIO;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 
 /**
@@ -20,10 +23,25 @@ public class Main {
      * Instància dels paràmetres d'entrada del terminal.
      */
     final MainCLIParameters mainArgs = new MainCLIParameters();
+
+    /**
+     * Finestra on es reprodueix el video.
+     */
     private Visor visor;
+
+    /**
+     * Variable per saber els fps reals.
+     */
     private FPSCounter fpsCounter;
 
+    /**
+     * Variable global per tenir els fps dins el thread.
+     */
     private int fps;
+
+    /**
+     * Variable global per poder tenir el zip dins del thread.
+     */
     private ZipInputStream input_stream;
 
     /**
@@ -79,8 +97,6 @@ public class Main {
      *         Lectura de fitxers TODO definir i actualitzar això
      */
     void run() throws IOException {
-        // De moment ho poso aqui pk corri
-        // ideal-ment s'hauria de moure a una altra classe
         visor = null;
         fpsCounter = new FPSCounter();
         fps = mainArgs.getFps();
@@ -90,6 +106,8 @@ public class Main {
 
 
         Timer timer = new Timer();
+
+        // Thread individual per executar el video i així tenir els fps controlats.
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
