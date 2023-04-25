@@ -21,7 +21,9 @@ public class Main {
      */
     final MainCLIParameters mainArgs = new MainCLIParameters();
     private Visor visor;
+    private FPSCounter fpsCounter;
 
+    private int fps;
     private ZipInputStream input_stream;
 
     /**
@@ -80,7 +82,8 @@ public class Main {
         // De moment ho poso aqui pk corri
         // ideal-ment s'hauria de moure a una altra classe
         visor = null;
-        int fps = mainArgs.getFps();
+        fpsCounter = new FPSCounter();
+        fps = mainArgs.getFps();
         if(fps == 0) {
             fps = 24;
         }
@@ -108,9 +111,14 @@ public class Main {
                             if(visor == null) {
                                 visor = new Visor(image);
                                 visor.setVisible(true);
+                                fpsCounter.increase_counter();
                             }
                             else {
                                 visor.update_image(image);
+                                fpsCounter.increase_counter();
+                                if(fpsCounter.getCounter() % fps == 0) {
+                                    fpsCounter.printFPS();
+                                }
                             }
                         }
                     }
