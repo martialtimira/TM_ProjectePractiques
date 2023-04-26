@@ -3,14 +3,13 @@ import paramManager.MainCLIParameters;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 
 /**
@@ -45,6 +44,8 @@ public class Main {
      * Variable global per poder tenir el zip dins del thread.
      */
     private ZipInputStream input_stream;
+
+    private ZipOutputStream zip_output_stream;
 
     /**
      * Mètode principal del programa. Crea una instància de la classe Main, gestiona els arguments d'entrada,
@@ -114,6 +115,7 @@ public class Main {
             @Override
             public void run() {
                 int avg_value = mainArgs.getAveraging_value();
+                String outputName = mainArgs.getOutputPath();
                 ZipEntry entry;
                 Path file_path = mainArgs.getInputPath();
                 if(input_stream == null) {
@@ -135,7 +137,6 @@ public class Main {
                                 }
 
                                 display_image = average_filter_applier.applyAverageFilter(image);
-                                //add code to save into a new ZIP?
                             }
                             if(visor == null) {
                                 visor = new Visor(display_image);
@@ -149,6 +150,21 @@ public class Main {
                                     fpsCounter.printFPS();
                                 }
                             }
+                            if(outputName != null) {
+                                try {
+                                    ZipEntry output_entry = new ZipEntry("image" + fpsCounter.getCounter() + ".png");
+                                    if(zip_output_stream == null) {
+                                        zip_output_stream = new ZipOutputStream(new FileOutputStream(outputName, true));
+                                    }
+                                    zip_output_stream.putNextEntry(output_entry);
+                                    ImageIO.write(display_image, "png", zip_output_stream);
+                                    zip_output_stream.closeEntry();
+                                    //zip_output_stream.close();
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+
                         }
                     }
                     // Indiquem que hem acabat de llegir aquesta entrada

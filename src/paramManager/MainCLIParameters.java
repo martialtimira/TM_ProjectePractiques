@@ -24,7 +24,6 @@ public class MainCLIParameters {
     private Path input;
 
     @Parameter(names = {"-o", "--output"},
-            validateWith = FileParemeterValidator.class,
             description = "<path to file> : Nom del fitxer en format propi amb la seqüència d’imatges de sortida i la " +
                     "informació necessària per la descodificació.")
     private String output;
@@ -83,6 +82,8 @@ public class MainCLIParameters {
     public boolean isHelp(){return help;}
 
     public Path getInputPath() {return input;}
+
+    public String getOutputPath() {return output;}
 
     public int getFps() {return fps;}
 
