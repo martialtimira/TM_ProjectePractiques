@@ -4,7 +4,9 @@ import paramManager.MainCLIParameters;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.zip.ZipEntry;
@@ -34,6 +36,11 @@ public class Main {
     private FPSCounter fpsCounter;
 
     private AverageFilterApplier average_filter_applier;
+
+    private int numFiles;
+    private int processed_frame_counter;
+
+    private ArrayList<File> image_list;
 
     /**
      * Variable global per tenir els fps dins el thread.
@@ -103,9 +110,20 @@ public class Main {
         visor = null;
         fpsCounter = new FPSCounter();
         fps = mainArgs.getFps();
+        image_list = new ArrayList<>();
         if(fps == 0) {
             fps = 24;
         }
+        //Primer, mirem quants frames haurem de reproduir, per saber quan hem reproduit l'ultim.
+        ZipInputStream zis = new ZipInputStream(new FileInputStream(mainArgs.getInputPath().toString()));
+        ZipEntry entry;
+        numFiles = 0;
+        while ((entry = zis.getNextEntry()) != null) {
+            if (!entry.isDirectory()) {
+                numFiles++;
+            }
+        }
+        zis.close();
 
 
         Timer timer = new Timer();
@@ -150,32 +168,55 @@ public class Main {
                                     fpsCounter.printFPS();
                                 }
                             }
+                            //En cas de que s'hagi introduït un output file per paràmetres, es guarda el frame a la llista de imatges.
                             if(outputName != null) {
-                                try {
-                                    ZipEntry output_entry = new ZipEntry("image" + fpsCounter.getCounter() + ".png");
-                                    if(zip_output_stream == null) {
-                                        zip_output_stream = new ZipOutputStream(new FileOutputStream(outputName, true));
-                                    }
-                                    zip_output_stream.putNextEntry(output_entry);
-                                    ImageIO.write(display_image, "png", zip_output_stream);
-                                    zip_output_stream.closeEntry();
-                                    //zip_output_stream.close();
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
+                                File image_file = new File((entry.getName()));
+                                ImageIO.write(display_image, "png", image_file);
+                                image_list.add(image_file);
                             }
 
                         }
                     }
                     // Indiquem que hem acabat de llegir aquesta entrada
                     input_stream.closeEntry();
+                    if (zip_output_stream != null) {
+                        zip_output_stream.close();
+                        zip_output_stream = null;
+                    }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
+                }
+                processed_frame_counter++;
+                if(processed_frame_counter == numFiles && outputName != null) {
+                    zip_files();
                 }
             }
         };
 
         timer.schedule(task, 0, 1000/fps);
 
+    }
+
+    /**
+     * Mètode per comprimir tots els frames de image_list a un zip que tingui el nom introduït per paràmetres.
+     */
+    public void zip_files() {
+        File output_file = new File(mainArgs.getOutputPath());
+        try {
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(output_file));
+            zip_output_stream = new ZipOutputStream(bos);
+
+            for(File file: image_list) {
+                zip_output_stream.putNextEntry(new ZipEntry(file.getName()));
+                Files.copy(file.toPath(), zip_output_stream);
+                zip_output_stream.closeEntry();
+                file.delete();
+            }
+            zip_output_stream.close();
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
