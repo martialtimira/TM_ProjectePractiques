@@ -165,6 +165,7 @@ public class Main {
                         if(!entry.isDirectory()) {
                             BufferedImage image = ImageIO.read(input_stream);
                             BufferedImage display_image = image;
+                            //Comprovem que l'usuari hagi definit un valor a avg_value per paràmetres, en cas afirmatiu, apliquem el filtre convolucional
                             if(avg_value != 0) {
                                 if(average_filter_applier == null) {
                                     average_filter_applier = new AverageFilterApplier(avg_value);
