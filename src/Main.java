@@ -34,6 +34,8 @@ public class Main {
      */
     private FPSCounter fpsCounter;
 
+    private AverageFilterApplier average_filter_applier;
+
     /**
      * Variable global per tenir els fps dins el thread.
      */
@@ -111,6 +113,7 @@ public class Main {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
+                int avg_value = mainArgs.getAveraging_value();
                 ZipEntry entry;
                 Path file_path = mainArgs.getInputPath();
                 if(input_stream == null) {
@@ -125,14 +128,22 @@ public class Main {
                     if(entry != null) {
                         if(!entry.isDirectory()) {
                             BufferedImage image = ImageIO.read(input_stream);
+                            BufferedImage display_image = image;
+                            if(avg_value != 0) {
+                                if(average_filter_applier == null) {
+                                    average_filter_applier = new AverageFilterApplier(avg_value);
+                                }
 
+                                display_image = average_filter_applier.applyAverageFilter(image);
+                                //add code to save into a new ZIP?
+                            }
                             if(visor == null) {
-                                visor = new Visor(image);
+                                visor = new Visor(display_image);
                                 visor.setVisible(true);
                                 fpsCounter.increase_counter();
                             }
                             else {
-                                visor.update_image(image);
+                                visor.update_image(display_image);
                                 fpsCounter.increase_counter();
                                 if(fpsCounter.getCounter() % fps == 0) {
                                     fpsCounter.printFPS();

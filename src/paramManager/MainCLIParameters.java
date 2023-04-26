@@ -44,6 +44,10 @@ public class MainCLIParameters {
 
     // TODO: Introduir paràmetres pels filtres que implementem
 
+    @Parameter(names = {"--averaging"},
+            validateWith = PositiveIntegerValidation.class,
+            description = "<averaging> : valor value on es farà l'averaging de pixels RGB en un kernel de valuexvalue.")
+    private int averaging_value;
 
     // TODO: Definir quin tipus d'input volem
     @Parameter(names = {"--nTiles"},
@@ -81,5 +85,7 @@ public class MainCLIParameters {
     public Path getInputPath() {return input;}
 
     public int getFps() {return fps;}
+
+    public int getAveraging_value() {return averaging_value;}
 }
 
