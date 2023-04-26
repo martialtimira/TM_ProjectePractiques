@@ -35,11 +35,24 @@ public class Main {
      */
     private FPSCounter fpsCounter;
 
+    /**
+     * Classe que aplica el filtre average
+     */
     private AverageFilterApplier average_filter_applier;
 
+    /**
+     * Contador per saber el numero de frames a processar
+     */
     private int numFiles;
+
+    /**
+     * Contador de frames processats
+     */
     private int processed_frame_counter;
 
+    /**
+     * Llista de fitxers a comprimir a l'output zip
+     */
     private ArrayList<File> image_list;
 
     /**
@@ -52,6 +65,9 @@ public class Main {
      */
     private ZipInputStream input_stream;
 
+    /**
+     * Variable global per poder tenir el zip dins del thread.
+     */
     private ZipOutputStream zip_output_stream;
 
     /**
