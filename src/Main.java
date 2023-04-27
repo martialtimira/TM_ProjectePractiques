@@ -63,7 +63,7 @@ public class Main {
     /**
      * Llista de fitxers a comprimir a l'output zip
      */
-    private ArrayList<File> image_list;
+    private ArrayList<Pair> image_list;
 
     /**
      * Variable global per tenir els fps dins el thread.
@@ -211,9 +211,8 @@ public class Main {
 
                             //En cas de que s'hagi introduït un output file per paràmetres, es guarda el frame a la llista de imatges.
                             if(outputName != null) {
-                                File image_file = new File((entry.getName()));
-                                ImageIO.write(display_image, "png", image_file);
-                                image_list.add(image_file);
+                                Pair pair = new Pair(entry.getName(), display_image);
+                                image_list.add(pair);
                             }
                         }
                     } else {
@@ -251,13 +250,18 @@ public class Main {
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(output_file));
             zip_output_stream = new ZipOutputStream(bos);
 
-            for(File file: image_list) {
-                zip_output_stream.putNextEntry(new ZipEntry(file.getName()));
-                Files.copy(file.toPath(), zip_output_stream);
+            for(Pair pair: image_list) {
+                String file_name = (String) pair.getFirst();
+                File image_file = new File(file_name);
+                BufferedImage display_image = (BufferedImage) pair.getSecond();
+                ImageIO.write(display_image, "png", image_file);
+                zip_output_stream.putNextEntry(new ZipEntry(file_name));
+                Files.copy(image_file.toPath(), zip_output_stream);
                 zip_output_stream.closeEntry();
-                file.delete();
+                image_file.delete();
             }
             zip_output_stream.close();
+            System.out.println("ZIP Generated");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
