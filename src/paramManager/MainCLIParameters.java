@@ -101,5 +101,7 @@ public class MainCLIParameters {
     public boolean isVerbose() {return verbose;}
 
     public boolean applyNegative() {return negative;}
+
+    public boolean hasWindow() {return batch;}
 }
 

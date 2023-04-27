@@ -197,15 +197,17 @@ public class Main {
                             }
 
                             // Actualitzar o iniciar el visor de video.
-                            if(visor == null) {
-                                visor = new Visor(display_image);
-                                visor.setVisible(true);
-                                fpsCounter.increase_counter();
-                            } else {
-                                visor.update_image(display_image);
-                                fpsCounter.increase_counter();
-                                if(verbose && fpsCounter.getCounter() % fps == 0) {
-                                    fpsCounter.printFPS();
+                            if(!mainArgs.hasWindow()) {
+                                if (visor == null) {
+                                    visor = new Visor(display_image);
+                                    visor.setVisible(true);
+                                    fpsCounter.increase_counter();
+                                } else {
+                                    visor.update_image(display_image);
+                                    fpsCounter.increase_counter();
+                                    if (verbose && fpsCounter.getCounter() % fps == 0) {
+                                        fpsCounter.printFPS();
+                                    }
                                 }
                             }
 
