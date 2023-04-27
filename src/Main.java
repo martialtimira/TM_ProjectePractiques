@@ -41,6 +41,16 @@ public class Main {
     private AverageFilterApplier average_filter_applier;
 
     /**
+     * Classe que controla la progressbar.
+     */
+    private progressBar pb;
+
+    /**
+     * Nombre de fitxers que s'han operat.
+     */
+    private int fileCounter;
+
+    /**
      * Contador per saber el numero de frames a processar
      */
     private int numFiles;
@@ -80,9 +90,6 @@ public class Main {
      *         Si hi ha hagut algun error durant l'execució.
      */
     public static void main(String[] args) throws IOException {
-        args = new String[2];
-        args[0] = "-i";
-        args[1] = "Cubo.zip";
         Main app = new Main();
         app.handleInputArgs(args);
         app.run();
@@ -144,6 +151,8 @@ public class Main {
         }
         zis.close();
 
+        pb = new progressBar(numFiles);
+        fileCounter = 0;
 
         Timer timer = new Timer();
 
@@ -151,10 +160,13 @@ public class Main {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
+                ZipEntry entry;
+
                 int avg_value = mainArgs.getAveraging_value();
                 String outputName = mainArgs.getOutputPath();
-                ZipEntry entry;
                 Path file_path = mainArgs.getInputPath();
+                boolean verbose = mainArgs.isVerbose();
+
                 if(input_stream == null) {
                     try {
                         input_stream = new ZipInputStream(new FileInputStream(file_path.toString()));
@@ -163,11 +175,13 @@ public class Main {
                     }
                 }
                 try {
+                    fileCounter++;
                     entry = input_stream.getNextEntry();
                     if(entry != null) {
                         if(!entry.isDirectory()) {
                             BufferedImage image = ImageIO.read(input_stream);
                             BufferedImage display_image = image;
+
                             //Comprovem que l'usuari hagi definit un valor a avg_value per paràmetres, en cas afirmatiu, apliquem el filtre convolucional
                             if(avg_value != 0) {
                                 if(average_filter_applier == null) {
@@ -176,26 +190,34 @@ public class Main {
 
                                 display_image = average_filter_applier.applyAverageFilter(image);
                             }
+
+                            // Aplicar el filtre negatiu.
+                            if(mainArgs.applyNegative()) {
+                                Negative.applyNegativeFilter(display_image);
+                            }
+
+                            // Actualitzar o iniciar el visor de video.
                             if(visor == null) {
                                 visor = new Visor(display_image);
                                 visor.setVisible(true);
                                 fpsCounter.increase_counter();
-                            }
-                            else {
+                            } else {
                                 visor.update_image(display_image);
                                 fpsCounter.increase_counter();
-                                if(fpsCounter.getCounter() % fps == 0) {
+                                if(verbose && fpsCounter.getCounter() % fps == 0) {
                                     fpsCounter.printFPS();
                                 }
                             }
+
                             //En cas de que s'hagi introduït un output file per paràmetres, es guarda el frame a la llista de imatges.
                             if(outputName != null) {
                                 File image_file = new File((entry.getName()));
                                 ImageIO.write(display_image, "png", image_file);
                                 image_list.add(image_file);
                             }
-
                         }
+                    } else {
+                        return;
                     }
                     // Indiquem que hem acabat de llegir aquesta entrada
                     input_stream.closeEntry();
@@ -203,6 +225,9 @@ public class Main {
                         zip_output_stream.close();
                         zip_output_stream = null;
                     }
+
+                    // Actualitzar la progress bar.
+                    pb.update(fileCounter);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -233,10 +258,9 @@ public class Main {
                 file.delete();
             }
             zip_output_stream.close();
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 }
+
