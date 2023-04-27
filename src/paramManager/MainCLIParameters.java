@@ -24,7 +24,6 @@ public class MainCLIParameters {
     private Path input;
 
     @Parameter(names = {"-o", "--output"},
-            validateWith = FileParemeterValidator.class,
             description = "<path to file> : Nom del fitxer en format propi amb la seqüència d’imatges de sortida i la " +
                     "informació necessària per la descodificació.")
     private String output;
@@ -44,6 +43,10 @@ public class MainCLIParameters {
 
     // TODO: Introduir paràmetres pels filtres que implementem
 
+    @Parameter(names = {"--averaging"},
+            validateWith = PositiveIntegerValidation.class,
+            description = "<averaging> : valor value on es farà l'averaging de pixels RGB en un kernel de valuexvalue.")
+    private int averaging_value;
 
     // TODO: Definir quin tipus d'input volem
     @Parameter(names = {"--nTiles"},
@@ -80,6 +83,10 @@ public class MainCLIParameters {
 
     public Path getInputPath() {return input;}
 
+    public String getOutputPath() {return output;}
+
     public int getFps() {return fps;}
+
+    public int getAveraging_value() {return averaging_value;}
 }
 
