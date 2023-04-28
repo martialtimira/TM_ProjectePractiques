@@ -1,5 +1,7 @@
 # Codec de Video
-
+Autors:
+- Joan Subirana Adell
+- Martí Altimira Cebrian
 ### Explicació
 En aquest projecte de l'assignatura de Tecnologies Multimedia de la Universitat de Barcelona, es planteja el 
 desenvolupament d'un software codec de video, el qual permeti codificar i decodificar fitxers per mostrar-los com a 
