@@ -246,6 +246,9 @@ public class Main {
 
                             // Actualitzar o iniciar el visor de video.
                             if(!mainArgs.hasWindow()) {
+                                //IF DECODE: REPRO DESDE DECODIFIER
+
+                                //ELSE:
                                 if (visor == null) {
                                     visor = new Visor(display_image);
                                     visor.setVisible(true);

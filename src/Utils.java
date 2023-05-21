@@ -1,57 +1,8 @@
-import ImageClass.ImageFrame;
-
-import javax.imageio.ImageIO;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class Utils {
-
-    public int count;
-    public void saveZip(ArrayList<ImageFrame> imgList, String outName){
-        ZipOutputStream outputStreamZip = null;
-        BufferedOutputStream outputStreamBuffered;
-        FileOutputStream outputStreamFile;
-        try {
-            outputStreamFile = new FileOutputStream(outName, true);
-            outputStreamBuffered = new BufferedOutputStream (outputStreamFile);
-            outputStreamZip = new ZipOutputStream(outputStreamBuffered);
-
-            for (ImageFrame image : imgList) {
-                ZipEntry entry = new ZipEntry("outImage"+image.getId()+".jpg");
-                try {
-                    outputStreamZip.putNextEntry(entry);
-                    ImageIO.write(image.getImage(), "jpg", outputStreamZip);
-                } catch (IOException ex) {
-                    System.out.println("ERROR: There has been a problem while writing the image to the output file");
-                    try{
-                        outputStreamZip.flush();
-                        outputStreamZip.close();
-                    } catch (Exception e) {
-                        System.out.println("S'ha produit un error tancant la connexio");
-                    }
-                }
-                this.count++;
-            }
-            try{
-                outputStreamZip.flush();
-                outputStreamZip.close();
-            } catch (Exception e) {
-                System.out.println("S'ha produit un error tancant la connexio");
-            }
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
-            try{
-                outputStreamZip.flush();
-                outputStreamZip.close();
-            } catch (Exception e) {
-                System.out.println("S'ha produit un error tancant la connexio");
-            }
-        }
-    }
 
     public void addFile(String path, String srcFile, ZipOutputStream zos) {
         File folder = new File(srcFile);

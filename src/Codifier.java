@@ -61,7 +61,7 @@ public class Codifier {
                     if(i + 1 >= imageList.size()) {
                         gopList.add(new ImageFrame((BufferedImage) imageList.get(i).getSecond(), i));
                     }
-                    this.utils.saveZip(gopList, "newZip.zip");
+                    //this.utils.saveZip(gopList, "newZip.zip");
                     gopListList.add(gopList);
                 }
                 gopList = new ArrayList<>();
