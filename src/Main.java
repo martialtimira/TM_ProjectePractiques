@@ -179,12 +179,7 @@ public class Main {
             ntiles = mainArgs.getnTiles();
             seekRange = mainArgs.getSeekRange();
             quality = mainArgs.getQuality();
-            System.out.println("Encode: " + encode);
-            System.out.println("ntiles: " + ntiles);
-            System.out.println("SeekRange: " + seekRange);
-            System.out.println("quality: " + quality);
         }
-        System.out.println("ENCODE: " + encode);
         if(fps == 0) {
             fps = 24;
         }

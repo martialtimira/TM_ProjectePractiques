@@ -39,13 +39,15 @@ public class progressBar {
      * @param iteration Iteració que s'està duent a terme.
      */
     public void update(int iteration) {
-        float mod = iteration % ratio;
-        if (mod < last && pos < bar.length) {
-            bar[pos] = '█';
-            pos++;
+        float percent = (float) iteration/size;
+        int barsToFill = (int) (bar.length * percent);
+        for (int i = 0; i < barsToFill; i++) {
+            if (i < bar.length) {
+                bar[i] = '█';
+            }
         }
-        last = mod;
-        print((float) iteration/size);
+
+        print(percent);
     }
 
     /**

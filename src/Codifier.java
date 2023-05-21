@@ -54,14 +54,12 @@ public class Codifier {
      * S'omple la llista de grups d'imatges depenent del paràmentre GOP
      */
     private void fillGOP() {
-        System.out.println("FILLING GOP");
         for(int i = 0; i < imageList.size(); i++) {
             if(i % gop == 0 || i + 1 >= imageList.size()) {
                 if(!gopList.isEmpty()) {
                     if(i + 1 >= imageList.size()) {
                         gopList.add(new ImageFrame((BufferedImage) imageList.get(i).getSecond(), i));
                     }
-                    //this.utils.saveZip(gopList, "newZip.zip");
                     gopListList.add(gopList);
                 }
                 gopList = new ArrayList<>();
@@ -74,7 +72,6 @@ public class Codifier {
         progressBar pb = new progressBar(gopListList.size());
         ImageFrame n, n_1;
         for(int p = 0; p < gopListList.size(); p++) {
-            System.out.println("GOP " + p + "/" + gopListList.size());
             ArrayList<ImageFrame> currentGOPList = gopListList.get(p);
             for(int z = 0; z < currentGOPList.size() - 1; z++) {
                 n = (ImageFrame) currentGOPList.get(z);
@@ -90,8 +87,9 @@ public class Codifier {
                 ImageFrame result = new ImageFrame(setColorPFrame(n.getTiles(), n_1.getImage()), 5);
                 compressedFrameList.add(result);
                 tileList.addAll(n.getTiles());
+                pb.update(p);
             }
-            pb.update(p);
+
         }
         this.saveZip();
         System.out.println("DONE");
