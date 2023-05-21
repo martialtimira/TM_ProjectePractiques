@@ -51,6 +51,11 @@ public class Main {
     private int fileCounter;
 
     /**
+     * String amb el nom del output file
+     */
+    private String outputName;
+
+    /**
      * Contador per saber el numero de frames a processar
      */
     private int numFiles;
@@ -69,6 +74,36 @@ public class Main {
      * Variable global per tenir els fps dins el thread.
      */
     private int fps;
+
+    /**
+     * Variable global per saber si s'ha de fer encode o no
+     */
+    private boolean encode;
+
+    /**
+     * Variable global per saber si s'ha de fer decode o no
+     */
+    private boolean decode;
+
+    /**
+     * Variable global per saber el numero de tessel·les en el que dividir els frames
+     */
+    private int ntiles;
+
+    /**
+     * Variable global que conté el seekRange
+     */
+    private int seekRange;
+
+    /**
+     * Variable global que conté el GOP
+     */
+    private int gop;
+
+    /**
+     * Variable global que conté la qualitat
+     */
+    private int quality;
 
     /**
      * Variable global per poder tenir el zip dins del thread.
@@ -137,6 +172,19 @@ public class Main {
         fpsCounter = new FPSCounter();
         fps = mainArgs.getFps();
         image_list = new ArrayList<>();
+        encode = mainArgs.getEncode();
+        decode = mainArgs.getDecode();
+        if(encode) {
+            gop = mainArgs.getGOP();
+            ntiles = mainArgs.getnTiles();
+            seekRange = mainArgs.getSeekRange();
+            quality = mainArgs.getQuality();
+            System.out.println("Encode: " + encode);
+            System.out.println("ntiles: " + ntiles);
+            System.out.println("SeekRange: " + seekRange);
+            System.out.println("quality: " + quality);
+        }
+        System.out.println("ENCODE: " + encode);
         if(fps == 0) {
             fps = 24;
         }
@@ -163,7 +211,7 @@ public class Main {
                 ZipEntry entry;
 
                 int avg_value = mainArgs.getAveraging_value();
-                String outputName = mainArgs.getOutputPath();
+                outputName = mainArgs.getOutputPath();
                 Path file_path = mainArgs.getInputPath();
                 boolean verbose = mainArgs.isVerbose();
 
@@ -233,8 +281,17 @@ public class Main {
                     throw new RuntimeException(e);
                 }
                 processed_frame_counter++;
+
+                // Guarder les imatges filtrades en un zip (desactivar si es fa encoding, ja que la classe encoder ho guarda ella.)
                 if(processed_frame_counter == numFiles && outputName != null) {
-                    zip_files();
+                    if(encode) {
+                        System.out.println("ENCODING");
+                        Codifier codifier = new Codifier(image_list, gop, ntiles, seekRange, quality, outputName);
+                        codifier.encode();
+                    }
+                    else {
+                        zip_files();
+                    }
                 }
             }
         };

@@ -59,10 +59,9 @@ public class MainCLIParameters {
     private boolean verbose;
 
     @Parameter(names = {"--nTiles"},
-            //validateWith = IntegerArrayValidation.class,
-            description = "<value, ...> : Nombre de tessel·les en la qual dividir la imatge. Es poden indicar diferents " +
-                    "valors per l’eix vertical i horitzontal, o bé especificar la mida de les tessel·les en píxels.")
-    private Object tiles;
+            validateWith = PositiveIntegerValidation.class,
+            description = "<value> : Nombre de tessel·les en la qual dividir la imatge.")
+    private int tiles;
 
     @Parameter(names = {"--seekRange"},
             validateWith = PositiveIntegerValidation.class,
@@ -103,5 +102,17 @@ public class MainCLIParameters {
     public boolean applyNegative() {return negative;}
 
     public boolean hasWindow() {return batch;}
+
+    public boolean getEncode() {return encode;}
+
+    public boolean getDecode() {return decode;}
+
+    public int getnTiles() {return tiles;}
+
+    public int getSeekRange() {return seekRange;}
+
+    public int getGOP() {return gop;}
+
+    public int getQuality() {return quality;}
 }
 
