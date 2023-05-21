@@ -71,8 +71,7 @@ public class Codifier {
     }
 
     private void iterateGOP() {
-        System.out.println("iterating GOP");
-        int i = 0;
+        progressBar pb = new progressBar(gopListList.size());
         ImageFrame n, n_1;
         for(int p = 0; p < gopListList.size(); p++) {
             System.out.println("GOP " + p + "/" + gopListList.size());
@@ -92,6 +91,7 @@ public class Codifier {
                 compressedFrameList.add(result);
                 tileList.addAll(n.getTiles());
             }
+            pb.update(p);
         }
         this.saveZip();
         System.out.println("DONE");
@@ -112,9 +112,9 @@ public class Codifier {
                 counter++;
             }
         }
-        System.out.println("-------------------------------------------------------");
-        System.out.println("teseles:" + tiles.size());
-        System.out.println("-------------------------------------------------------");
+        //System.out.println("-------------------------------------------------------");
+        //System.out.println("teseles:" + tiles.size());
+        //System.out.println("-------------------------------------------------------");
 
         return tiles;
     }
@@ -183,7 +183,7 @@ public class Codifier {
 
     private void createCoordFile() {
         try {
-            String name = "src/Compressed/coords.txt";
+            String name = "Compressed/coords.txt";
             BufferedWriter writer = new BufferedWriter(new FileWriter(name));
             for(Tile tile: this.tileList) {
                 writer.write(tile.getId() + " " + tile.getCoordX() + " " + tile.getCoordY() + "\n");
@@ -239,7 +239,7 @@ public class Codifier {
         for(ArrayList<ImageFrame> frame: gopListList) {
             frame.forEach((file) -> {
                 try {
-                    JPEGCompressor.compress(file.getImage(), "src/Compressed/", "frame" + String.format("%02d", file.getId()) + ".jpeg");
+                    JPEGCompressor.compress(file.getImage(), "Compressed/", "frame" + String.format("%02d", file.getId()) + ".jpeg");
 
                 } catch (IOException e) {
                     System.err.println("IOException saving images" + e);
@@ -252,11 +252,11 @@ public class Codifier {
      * Guarda en un ZIP el fitxer de coordenades i les imatges codificades
      */
     private void saveZip() {
-        new File("src/Compressed").mkdirs();
+        new File("Compressed").mkdirs();
         this.createCoordFile();
         this.saveImages();
-        this.utils.createZipFolder("src/Compressed", "src/" + this.outputPath);
-        File outputFile = new File("src/"+this.outputPath);
-        this.utils.deleteDirectory(new File("src/Compressed"));
+        this.utils.createZipFolder("Compressed", this.outputPath);
+        File outputFile = new File(this.outputPath);
+        this.utils.deleteDirectory(new File("Compressed"));
     }
 }
