@@ -174,7 +174,8 @@ public class Main {
         image_list = new ArrayList<>();
         encode = mainArgs.getEncode();
         decode = mainArgs.getDecode();
-        if(encode) {
+        this.outputName = mainArgs.getOutputPath();
+        if(encode || decode) {
             gop = mainArgs.getGOP();
             ntiles = mainArgs.getnTiles();
             seekRange = mainArgs.getSeekRange();
@@ -200,14 +201,25 @@ public class Main {
         Timer timer = new Timer();
 
         // Thread individual per executar el video i així tenir els fps controlats.
+        if(!this.decode) {
+            playNotDecode(timer);
+        }
+        else {
+            Decoder decoder = new Decoder(this.fps, this.gop, this.ntiles, this.outputName, mainArgs.getInputPath().toString());
+            image_list = decoder.decode();
+            System.out.println("DONE");
+        }
+    }
+
+    public void playNotDecode(Timer timer) {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
                 ZipEntry entry;
 
                 int avg_value = mainArgs.getAveraging_value();
-                outputName = mainArgs.getOutputPath();
                 Path file_path = mainArgs.getInputPath();
+                //IF DECODE file_path = decoded files path
                 boolean verbose = mainArgs.isVerbose();
 
                 if(input_stream == null) {
@@ -295,9 +307,7 @@ public class Main {
         };
 
         timer.schedule(task, 0, 1000/fps);
-
     }
-
     /**
      * Mètode per comprimir tots els frames de image_list a un zip que tingui el nom introduït per paràmetres.
      */

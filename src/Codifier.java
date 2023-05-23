@@ -11,17 +11,17 @@ import ImageClass.Tile;
  */
 public class Codifier {
 
-    ArrayList<Pair> imageList = new ArrayList<>();
-    int gop = 5, seekRange, nTiles, quality, height, width;
-    ArrayList<ArrayList> gopListList = new ArrayList<>();
-    ArrayList<ImageFrame> gopList = new ArrayList<>();
+    private ArrayList<Pair> imageList;
+    private int gop = 5, seekRange, nTiles, quality, height, width;
+    private ArrayList<ArrayList> gopListList = new ArrayList<>();
+    private ArrayList<ImageFrame> gopList = new ArrayList<>();
 
-    ArrayList<ImageFrame> compressedFrameList = new ArrayList<>();
-    ArrayList<Tile> tileList = new ArrayList<>();
+    private ArrayList<ImageFrame> compressedFrameList = new ArrayList<>();
+    private ArrayList<Tile> tileList = new ArrayList<>();
 
-    Utils utils;
+    private Utils utils;
 
-    String outputPath;
+    private String outputPath;
 
     /**
      * Constructor de codificador
