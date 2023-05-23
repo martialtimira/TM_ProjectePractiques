@@ -65,6 +65,8 @@ public class Main {
      */
     private int processed_frame_counter;
 
+    private boolean batch;
+
     /**
      * Llista de fitxers a comprimir a l'output zip
      */
@@ -94,6 +96,8 @@ public class Main {
      * Variable global que conté el seekRange
      */
     private int seekRange;
+
+    private boolean verbose;
 
     /**
      * Variable global que conté el GOP
@@ -170,10 +174,12 @@ public class Main {
     void run() throws IOException {
         visor = null;
         fpsCounter = new FPSCounter();
+        this.batch = mainArgs.hasWindow();
         fps = mainArgs.getFps();
         image_list = new ArrayList<>();
         encode = mainArgs.getEncode();
         decode = mainArgs.getDecode();
+        verbose = mainArgs.isVerbose();
         this.outputName = mainArgs.getOutputPath();
         if(encode || decode) {
             gop = mainArgs.getGOP();
@@ -205,7 +211,8 @@ public class Main {
             playNotDecode(timer);
         }
         else {
-            Decoder decoder = new Decoder(this.fps, this.gop, this.ntiles, this.outputName, mainArgs.getInputPath().toString());
+            Decoder decoder = new Decoder(this.fps, this.gop, this.ntiles, this.outputName, mainArgs.getInputPath().toString(), this.visor,
+                    this.batch, this.verbose);
             image_list = decoder.decode();
             System.out.println("DONE");
         }
@@ -220,7 +227,6 @@ public class Main {
                 int avg_value = mainArgs.getAveraging_value();
                 Path file_path = mainArgs.getInputPath();
                 //IF DECODE file_path = decoded files path
-                boolean verbose = mainArgs.isVerbose();
 
                 if(input_stream == null) {
                     try {
@@ -252,7 +258,7 @@ public class Main {
                             }
 
                             // Actualitzar o iniciar el visor de video.
-                            if(!mainArgs.hasWindow()) {
+                            if(!batch) {
                                 //IF DECODE: REPRO DESDE DECODIFIER
 
                                 //ELSE:
