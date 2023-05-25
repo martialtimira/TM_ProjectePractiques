@@ -9,7 +9,6 @@ import java.util.Enumeration;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 public class Decoder {
@@ -19,7 +18,7 @@ public class Decoder {
     public ArrayList<BufferedImage> images;
 
     public int reproCounter;
-    private ArrayList<Pair> pairList;
+    private final ArrayList<Pair<String, BufferedImage>> pairList;
     public int gop;
     public int tileWidth;
     public int tileHeight;
@@ -30,13 +29,13 @@ public class Decoder {
     public FPSCounter fpsCounter;
     public Visor visor;
 
-    private String outputPath;
+    private final String outputPath;
 
-    private String inputPath;
+    private final String inputPath;
 
-    private boolean batch;
-    private boolean verbose;
-    private Utils utils;
+    private final boolean batch;
+    private final boolean verbose;
+    private final Utils utils;
 
     public Decoder(MainCLIParameters mainArgs, Visor visor) {
         this.outputPath = mainArgs.getOutputPath();
@@ -59,12 +58,12 @@ public class Decoder {
         this.verbose = mainArgs.isVerbose();
     }
 
-    public ArrayList<Pair> decode() {
+    public ArrayList<Pair<String, BufferedImage>> decode() {
         System.out.println("DECODING");
         this.readZIP();
         //START DECODING THREAD
         class DecodeTask implements Runnable {
-            Decoder decoder;
+            final Decoder decoder;
             public DecodeTask(Decoder decoder) {this.decoder = decoder;}
             @Override
             public void run() {
@@ -76,9 +75,7 @@ public class Decoder {
                     try {
                         String imageName = "frame" + counter + ".jpeg";
                         JPEGCompressor.compress(image, "Decompressed/", imageName);
-                        decoder.pairList.add(new Pair(imageName, image));
-                    } catch (FileNotFoundException e) {
-                        throw new RuntimeException(e);
+                        decoder.pairList.add(new Pair<>(imageName, image));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -98,7 +95,7 @@ public class Decoder {
             this.pb = new progressBar(this.images.size());
             this.fpsCounter = new FPSCounter();
             class ReproTask extends TimerTask {
-                Decoder decoder;
+                final Decoder decoder;
 
                 public ReproTask(Decoder decoder) { this.decoder = decoder;}
 
@@ -138,8 +135,11 @@ public class Decoder {
             if(fpsCounter != null) {
                 fpsCounter.increase_counter();
             }
-            if (verbose && fpsCounter.getCounter() % fps == 0) {
-                fpsCounter.printFPS();
+            if (verbose) {
+                assert fpsCounter != null;
+                if (fpsCounter.getCounter() % fps == 0) {
+                    fpsCounter.printFPS();
+                }
             }
         }
     }
@@ -224,8 +224,6 @@ public class Decoder {
                     this.images.add(image);
                 }
             }
-        } catch (ZipException e) {
-            throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

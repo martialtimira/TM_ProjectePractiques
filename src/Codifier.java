@@ -1,6 +1,5 @@
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
 import java.io.*;
 import java.util.ArrayList;
 import ImageClass.ImageFrame;
@@ -11,17 +10,22 @@ import ImageClass.Tile;
  */
 public class Codifier {
 
-    private ArrayList<Pair> imageList;
-    private int gop = 5, seekRange, nTiles, quality, height, width;
-    private ArrayList<ArrayList> gopListList = new ArrayList<>();
+    private final ArrayList<Pair<String, BufferedImage>> imageList;
+    private final int gop;
+    private final int seekRange;
+    private final int nTiles;
+    private final int quality;
+    private int height;
+    private int width;
+    private final ArrayList<ArrayList<ImageFrame>> gopListList = new ArrayList<>();
     private ArrayList<ImageFrame> gopList = new ArrayList<>();
 
-    private ArrayList<ImageFrame> compressedFrameList = new ArrayList<>();
-    private ArrayList<Tile> tileList = new ArrayList<>();
+    private final ArrayList<ImageFrame> compressedFrameList = new ArrayList<>();
+    private final ArrayList<Tile> tileList = new ArrayList<>();
 
-    private Utils utils;
+    private final Utils utils;
 
-    private String outputPath;
+    private final String outputPath;
 
     /**
      * Constructor de codificador
@@ -32,7 +36,7 @@ public class Codifier {
      * @param quality   Qualitat en la que fer el tall
      * @param outputPath Path de l'output
      */
-    public Codifier(ArrayList<Pair> imageList, int gop, int nTiles, int seekRange, int quality, String outputPath) {
+    public Codifier(ArrayList<Pair<String, BufferedImage>> imageList, int gop, int nTiles, int seekRange, int quality, String outputPath) {
         this.imageList = imageList;
         this.gop = gop;
         this.nTiles = nTiles;
@@ -58,13 +62,13 @@ public class Codifier {
             if(i % gop == 0 || i + 1 >= imageList.size()) {
                 if(!gopList.isEmpty()) {
                     if(i + 1 >= imageList.size()) {
-                        gopList.add(new ImageFrame((BufferedImage) imageList.get(i).getSecond(), i));
+                        gopList.add(new ImageFrame(imageList.get(i).getSecond(), i));
                     }
                     gopListList.add(gopList);
                 }
                 gopList = new ArrayList<>();
             }
-            gopList.add(new ImageFrame((BufferedImage) imageList.get(i).getSecond(), i));
+            gopList.add(new ImageFrame(imageList.get(i).getSecond(), i));
         }
     }
 
@@ -74,7 +78,7 @@ public class Codifier {
         for(int p = 0; p < gopListList.size(); p++) {
             ArrayList<ImageFrame> currentGOPList = gopListList.get(p);
             for(int z = 0; z < currentGOPList.size() - 1; z++) {
-                n = (ImageFrame) currentGOPList.get(z);
+                n = currentGOPList.get(z);
                 if(z == 0) {
                     this.compressedFrameList.add(n);
                 }
@@ -105,7 +109,7 @@ public class Codifier {
             for(float x = 0; x < Math.round(image.getWidth()); x += this.width) {
                 x = Math.round(x);
                 y = Math.round(y);
-                tile = new Tile(image.getSubimage((int)x, (int)y, (int)this.width, (int)this.height), counter);
+                tile = new Tile(image.getSubimage((int)x, (int)y, this.width, this.height), counter);
                 tiles.add(tile);
                 counter++;
             }
@@ -134,8 +138,8 @@ public class Codifier {
             minX = Math.max((x - seekRange), 0);
             minY = Math.max((y - seekRange), 0);
 
-            maxX = Math.min((x + height + seekRange), ((BufferedImage) imageList.get(0).getSecond()).getHeight());
-            maxY = Math.min((y + width + seekRange), ((BufferedImage) imageList.get(0).getSecond()).getWidth());
+            maxX = Math.min((x + height + seekRange), imageList.get(0).getSecond().getHeight());
+            maxY = Math.min((y + width + seekRange), imageList.get(0).getSecond().getWidth());
 
             for(int i = minX; i <= maxX - height; i++) {
                 for(int j = minY; j <= maxY - width; j++) {
@@ -163,7 +167,7 @@ public class Codifier {
     }
 
     private float getPSNRScore(Tile tile, BufferedImage pFrame) {
-        float noise = 0, mse = 0, psnr = 0;
+        float noise = 0, mse, psnr;
         BufferedImage iFrame = tile.getTile();
         for(int y = 0; y < iFrame.getHeight(); y++) {
             for(int x = 0; x < iFrame.getWidth(); x++) {

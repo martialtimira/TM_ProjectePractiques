@@ -21,10 +21,10 @@ Un cop compilat el codi, es pot procedir a l'execució, per això s'han de conè
   Fitxer d’entrada, és un argument obligatori.
 * -o, --output \<path to file> :  
   Nom del fitxer en format propi amb la seqüència d’imatges de sortida i la informació necessària per a la descodificació.
-* ~~-e, --encode :  
-  Argument que indica que s’haurà d’aplicar la codificació sobre el conjunt d’imatges d’input.~~
-* ~~-d, --decode :  
-  Argument que indica que s’haurà d’aplicar la descodificació sobre el conjunt d’imatges d’input.~~
+* -e, --encode :  
+  Argument que indica que s’haurà d’aplicar la codificació sobre el conjunt d’imatges d’input.
+* -d, --decode :  
+  Argument que indica que s’haurà d’aplicar la descodificació sobre el conjunt d’imatges d’input.
 * --fps \<value> :  
   Nombre d’imatges per segon amb les quals és reproduirà el vídeo.  
     _Default: 0_
@@ -33,14 +33,20 @@ Un cop compilat el codi, es pot procedir a l'execució, per això s'han de conè
 * --averaging \<averaging> :  
   valor value on es farà l'averaging de pixels RGB en un kernel de value x value.  
     _Default: 0_
-* ~~--nTiles \<value, ...> :  
+* --nTiles \<value, ...> :  
   Nombre de tessel·les en la qual dividir la imatge. Es poden indicar diferents valors per l’eix vertical i horitzontal, o bé
-    especificar la mida de les tessel·les en píxels.~~
-* ~~--seekRange \<value> :  
-  Desplaçament màxim en la cerca de tessel·les coincidents.~~
-*  ~~--GOP \<value> :  
-  Nombre d'imatges entre dos frames de referència.~~
+  especificar la mida de les tessel·les en píxels.  
+    _Encode default: 8_
+* --seekRange \<value> :  
+  Desplaçament màxim en la cerca de tessel·les coincidents.  
+    _Encode default: 10_
+*  --GOP \<value> :  
+  Nombre d'imatges entre dos frames de referència.  
+   _Encode default: 5_
 * -b, --batch :  
   Mode d'execució sense GUI, al terminal.
-* -v, --verbose :
+* -v, --verbose :  
   Argument que indica si es volen mostrar els fps.
+* --quality \<value> :  
+  Factor de qualitat que determinarà quan dos tessel·les és consideren coincidents.  
+  _Encode default: 24_

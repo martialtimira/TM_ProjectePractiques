@@ -70,7 +70,7 @@ public class Main {
     /**
      * Llista de fitxers a comprimir a l'output zip
      */
-    private ArrayList<Pair> image_list;
+    private ArrayList<Pair<String, BufferedImage>> image_list;
 
     /**
      * Variable global per tenir els fps dins el thread.
@@ -81,11 +81,6 @@ public class Main {
      * Variable global per saber si s'ha de fer encode o no
      */
     private boolean encode;
-
-    /**
-     * Variable global per saber si s'ha de fer decode o no
-     */
-    private boolean decode;
 
     /**
      * Variable global per saber el numero de tessel·les en el que dividir els frames
@@ -178,7 +173,7 @@ public class Main {
         fps = mainArgs.getFps();
         image_list = new ArrayList<>();
         encode = mainArgs.getEncode();
-        decode = mainArgs.getDecode();
+        boolean decode = mainArgs.getDecode();
         verbose = mainArgs.isVerbose();
         this.outputName = mainArgs.getOutputPath();
         if(encode || decode) {
@@ -207,7 +202,7 @@ public class Main {
         Timer timer = new Timer();
 
         // Thread individual per executar el video i així tenir els fps controlats.
-        if(!this.decode) {
+        if(!decode) {
             playNotDecode(timer);
         }
         else {
@@ -276,7 +271,7 @@ public class Main {
 
                             //En cas de que s'hagi introduït un output file per paràmetres, es guarda el frame a la llista de imatges.
                             if(outputName != null) {
-                                Pair pair = new Pair(entry.getName(), display_image);
+                                Pair<String, BufferedImage> pair = new Pair<>(entry.getName(), display_image);
                                 image_list.add(pair);
                             }
                         }
@@ -330,10 +325,10 @@ public class Main {
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(output_file));
             zip_output_stream = new ZipOutputStream(bos);
 
-            for(Pair pair: image_list) {
-                String file_name = (String) pair.getFirst();
+            for(Pair<String, BufferedImage> pair: image_list) {
+                String file_name = pair.getFirst();
                 File image_file = new File(file_name);
-                BufferedImage display_image = (BufferedImage) pair.getSecond();
+                BufferedImage display_image = pair.getSecond();
                 ImageIO.write(display_image, "png", image_file);
                 zip_output_stream.putNextEntry(new ZipEntry(file_name));
                 Files.copy(image_file.toPath(), zip_output_stream);

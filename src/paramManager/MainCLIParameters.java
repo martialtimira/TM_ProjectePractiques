@@ -61,7 +61,7 @@ public class MainCLIParameters {
     @Parameter(names = {"--nTiles"},
             validateWith = PositiveIntegerValidation.class,
             description = "<value> : Nombre de tessel·les en la qual dividir la imatge.")
-    private int tiles;
+    private Integer tiles;
 
     @Parameter(names = {"--seekRange"},
             validateWith = PositiveIntegerValidation.class,
@@ -75,11 +75,11 @@ public class MainCLIParameters {
 
     @Parameter(names = {"--quality"},
             validateWith = PositiveIntegerValidation.class,
-            description = "<value> : Factor de qualitat que determinarà quan dos tessel·les és consideren coincidents")
+            description = "<value> : Factor de qualitat que determinarà quan dos tessel·les és consideren coincidents.")
     private Integer quality;
 
     @Parameter(names = {"-b", "--batch"},
-            description = "Mode d'execució sense GUI, al terminal")
+            description = "Mode d'execució sense GUI, al terminal.")
     private boolean batch;
 
 
@@ -107,12 +107,13 @@ public class MainCLIParameters {
 
     public boolean getDecode() {return decode;}
 
-    public int getnTiles() {return tiles;}
+    // Default values, només en el cas que estiguem en encode
+    public int getnTiles() {return (this.getEncode() && tiles == null) ? 8 : tiles;}
 
-    public int getSeekRange() {return seekRange;}
+    public int getSeekRange() {return (this.getEncode() && seekRange == null) ? 10 : seekRange;}
 
-    public int getGOP() {return gop;}
+    public int getGOP() {return (this.getEncode() && gop == null) ? 5 : gop;}
 
-    public int getQuality() {return quality;}
+    public int getQuality() {return (this.getEncode() && quality == null) ? 24 : quality;}
 }
 
