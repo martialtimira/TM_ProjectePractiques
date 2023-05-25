@@ -43,8 +43,6 @@ public class MainCLIParameters {
             description = "<value> : Nombre d’imatges per segon amb les quals és reproduirà el vídeo.")
     private int fps;
 
-    // TODO: Introduir paràmetres pels filtres que implementem
-
     @Parameter(names = {"--averaging"},
             validateWith = PositiveIntegerValidation.class,
             description = "<averaging> : valor value on es farà l'averaging de pixels RGB en un kernel de value x value.")
@@ -61,22 +59,22 @@ public class MainCLIParameters {
     @Parameter(names = {"--nTiles"},
             validateWith = PositiveIntegerValidation.class,
             description = "<value> : Nombre de tessel·les en la qual dividir la imatge.")
-    private Integer tiles;
+    private Integer tiles = 8;
 
     @Parameter(names = {"--seekRange"},
             validateWith = PositiveIntegerValidation.class,
             description = "<value> : Desplaçament màxim en la cerca de tessel·les coincidents.")
-    private Integer seekRange;
+    private Integer seekRange = 10;
 
     @Parameter(names = {"--GOP"},
             validateWith = PositiveIntegerValidation.class,
             description = "<value> : Nombre d'imatges entre dos frames de referència.")
-    private Integer gop;
+    private Integer gop = 5;
 
     @Parameter(names = {"--quality"},
             validateWith = PositiveIntegerValidation.class,
             description = "<value> : Factor de qualitat que determinarà quan dos tessel·les és consideren coincidents.")
-    private Integer quality;
+    private Integer quality = 24;
 
     @Parameter(names = {"-b", "--batch"},
             description = "Mode d'execució sense GUI, al terminal.")
@@ -107,13 +105,12 @@ public class MainCLIParameters {
 
     public boolean getDecode() {return decode;}
 
-    // Default values, només en el cas que estiguem en encode
-    public int getnTiles() {return (this.getEncode() && tiles == null) ? 8 : tiles;}
+    public int getnTiles() {return tiles;}
 
-    public int getSeekRange() {return (this.getEncode() && seekRange == null) ? 10 : seekRange;}
+    public int getSeekRange() {return seekRange;}
 
-    public int getGOP() {return (this.getEncode() && gop == null) ? 5 : gop;}
+    public int getGOP() {return gop;}
 
-    public int getQuality() {return (this.getEncode() && quality == null) ? 24 : quality;}
+    public int getQuality() {return quality;}
 }
 
