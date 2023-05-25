@@ -67,4 +67,16 @@ public class Utils {
             throw new RuntimeException(e);
         }
     }
+    public static String formatFileSize(long fileSize) {
+        String[] units = {"B", "KB", "MB", "GB", "TB"};
+        int unitIndex = 0;
+        double size = fileSize;
+
+        while (size >= 1024 && unitIndex < units.length - 1) {
+            size /= 1024;
+            unitIndex++;
+        }
+
+        return String.format("%.2f %s", size, units[unitIndex]);
+    }
 }

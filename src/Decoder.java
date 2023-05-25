@@ -1,4 +1,5 @@
 import ImageClass.Tile;
+import paramManager.MainCLIParameters;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -37,12 +38,15 @@ public class Decoder {
     private boolean verbose;
     private Utils utils;
 
-    public Decoder(int fps, int gop, int nTiles, String outputPath, String inputPath, Visor visor, boolean batch, boolean verbose) {
-        this.outputPath = outputPath;
-        this.inputPath = inputPath;
-        this.fps = fps;
-        this.gop = gop;
-        this.nTiles = nTiles;
+    public Decoder(MainCLIParameters mainArgs, Visor visor) {
+        this.outputPath = mainArgs.getOutputPath();
+        this.inputPath = mainArgs.getInputPath().toString();
+        this.fps = mainArgs.getFps();
+        if (this.fps == 0) {
+            this.fps = 24;
+        }
+        this.gop = mainArgs.getGOP();
+        this.nTiles = mainArgs.getnTiles();
         this.ids = new ArrayList<>();
         this.xCoords = new ArrayList<>();
         this.yCoords = new ArrayList<>();
@@ -51,8 +55,8 @@ public class Decoder {
         this.utils = new Utils();
         this.visor = visor;
         this.reproCounter = 0;
-        this.batch = batch;
-        this.verbose = verbose;
+        this.batch = mainArgs.hasWindow();
+        this.verbose = mainArgs.isVerbose();
     }
 
     public ArrayList<Pair> decode() {
@@ -106,7 +110,7 @@ public class Decoder {
 
             Timer timer = new Timer();
 
-            timer.schedule(new ReproTask(this), 0, 1000/this.fps);
+            timer.schedule(new ReproTask(this), 2, 1000/this.fps);
         }
 
         try {
@@ -116,6 +120,7 @@ public class Decoder {
         }
         return this.pairList;
     }
+
     public void reproduceImages() {
         if (reproCounter < this.images.size()) {
             BufferedImage image = this.images.get(reproCounter);

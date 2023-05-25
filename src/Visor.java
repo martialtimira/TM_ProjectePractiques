@@ -17,14 +17,18 @@ public class Visor extends JFrame {
     public Visor(BufferedImage imagen) {
 
         JPanel contentPane = new JPanel();
-        lblImageHolder = new JLabel("Image Holder");
+        lblImageHolder = new JLabel("");
         contentPane.add(lblImageHolder, BorderLayout.CENTER);
         this.setContentPane(contentPane);
 
         if (imagen != null) {
             ImageIcon icono = new ImageIcon((Image) imagen);
             lblImageHolder.setIcon(icono);
-            this.setSize(icono.getIconWidth(), icono.getIconHeight());
+            int width = icono.getIconWidth();
+            int height = icono.getIconHeight();
+            this.setSize(width, height);
+            this.setPreferredSize(new Dimension(width, height));
+            this.pack();
         }
 
     }

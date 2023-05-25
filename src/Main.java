@@ -211,8 +211,7 @@ public class Main {
             playNotDecode(timer);
         }
         else {
-            Decoder decoder = new Decoder(this.fps, this.gop, this.ntiles, this.outputName, mainArgs.getInputPath().toString(), this.visor,
-                    this.batch, this.verbose);
+            Decoder decoder = new Decoder(this.mainArgs, this.visor);
             image_list = decoder.decode();
             System.out.println("DONE");
         }
@@ -304,6 +303,14 @@ public class Main {
                         System.out.println("ENCODING");
                         Codifier codifier = new Codifier(image_list, gop, ntiles, seekRange, quality, outputName);
                         codifier.encode();
+                        File inputFile = new File(file_path.toString());
+                        File outputFile = new File(mainArgs.getOutputPath());
+                        String inputFileLength = Utils.formatFileSize(inputFile.length());
+                        String outputFileLength = Utils.formatFileSize(outputFile.length());
+                        System.out.println("Encoded " + file_path +"(" + inputFileLength + ") into " + mainArgs.getOutputPath()
+                        + "(" + outputFileLength + ")");
+                        System.out.println("Achieved compression factor of: " + String.format("%.2f", (float)inputFile.length() / (float)outputFile.length()) + ":1");
+
                     }
                     else {
                         zip_files();
