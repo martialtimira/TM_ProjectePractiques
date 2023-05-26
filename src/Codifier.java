@@ -88,7 +88,7 @@ public class Codifier {
 
                 n.setTiles(subdivideImageTiles(n.getImage()));
                 n.setTiles(findEqualTiles(n, n_1.getImage()));
-                ImageFrame result = new ImageFrame(setColorPFrame(n.getTiles(), n_1.getImage()), 5);
+                ImageFrame result = new ImageFrame(setColorPFrame(n.getTiles(), n_1.getImage()), 1);
                 compressedFrameList.add(result);
                 tileList.addAll(n.getTiles());
                 pb.update(p);
@@ -114,9 +114,6 @@ public class Codifier {
                 counter++;
             }
         }
-        //System.out.println("-------------------------------------------------------");
-        //System.out.println("teseles:" + tiles.size());
-        //System.out.println("-------------------------------------------------------");
 
         return tiles;
     }

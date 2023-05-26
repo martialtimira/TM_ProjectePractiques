@@ -82,6 +82,8 @@ public class Main {
      */
     private boolean encode;
 
+    private boolean doneEncoding;
+
     /**
      * Variable global per saber el numero de tessel·les en el que dividir els frames
      */
@@ -169,6 +171,7 @@ public class Main {
     void run() throws IOException {
         visor = null;
         fpsCounter = new FPSCounter();
+        this.doneEncoding = false;
         this.batch = mainArgs.hasWindow();
         fps = mainArgs.getFps();
         image_list = new ArrayList<>();
@@ -202,7 +205,7 @@ public class Main {
         Timer timer = new Timer();
 
         // Thread individual per executar el video i així tenir els fps controlats.
-        if(!decode) {
+        if(encode) {
             playNotDecode(timer);
         }
         else {
@@ -292,7 +295,7 @@ public class Main {
                 }
                 processed_frame_counter++;
 
-                // Guarder les imatges filtrades en un zip (desactivar si es fa encoding, ja que la classe encoder ho guarda ella.)
+                // Guardar les imatges filtrades en un zip (desactivar si es fa encoding, ja que la classe encoder ho guarda ella.)
                 if(processed_frame_counter == numFiles && outputName != null) {
                     if(encode) {
                         System.out.println("ENCODING");
@@ -305,6 +308,12 @@ public class Main {
                         System.out.println("Encoded " + file_path +"(" + inputFileLength + ") into " + mainArgs.getOutputPath()
                         + "(" + outputFileLength + ")");
                         System.out.println("Achieved compression factor of: " + String.format("%.2f", (float)inputFile.length() / (float)outputFile.length()) + ":1");
+                        if (mainArgs.getDecode()) {
+                            System.out.println("DECODING");
+                            Decoder decoder = new Decoder(mainArgs, visor);
+                            image_list = decoder.decode();
+                            System.out.println("DONE");
+                        }
 
                     }
                     else {

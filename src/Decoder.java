@@ -28,7 +28,7 @@ public class Decoder {
 
     private final String outputPath;
 
-    private final String inputPath;
+    private String inputPath;
 
     private final boolean batch;
     private final boolean verbose;
@@ -37,6 +37,9 @@ public class Decoder {
     public Decoder(MainCLIParameters mainArgs, Visor visor) {
         this.outputPath = mainArgs.getOutputPath();
         this.inputPath = mainArgs.getInputPath().toString();
+        if(mainArgs.getEncode() && mainArgs.getDecode()) {
+            this.inputPath = this.outputPath;
+        }
         this.fps = mainArgs.getFps();
         if (this.fps == 0) {
             this.fps = 24;

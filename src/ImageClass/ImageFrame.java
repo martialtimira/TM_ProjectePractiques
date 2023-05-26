@@ -11,13 +11,10 @@ public class ImageFrame {
     private BufferedImage image;
     private int id;
     private ArrayList<Tile> tiles;
-    private ArrayList<BufferedImage> pFrames;
 
     public ImageFrame(BufferedImage image, int id) {
         this.image = image;
-        this.id = id;
         this.tiles = new ArrayList<>();
-        this.pFrames = new ArrayList<>();
     }
 
     public BufferedImage getImage() {
@@ -32,9 +29,6 @@ public class ImageFrame {
         return this.id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public ArrayList<Tile> getTiles() {
         return this.tiles;
@@ -44,15 +38,4 @@ public class ImageFrame {
         this.tiles = tiles;
     }
 
-    public ArrayList<BufferedImage> getpFrames() {
-        return this.pFrames;
-    }
-
-    public void setpFrames(ArrayList<BufferedImage> pFrames) {
-        this.pFrames = pFrames;
-    }
-
-    public void addpFrame(BufferedImage image) {
-        this.pFrames.add(image);
-    }
 }
