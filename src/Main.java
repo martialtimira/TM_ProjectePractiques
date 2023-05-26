@@ -65,6 +65,12 @@ public class Main {
      */
     private int processed_frame_counter;
 
+    // TODO s'ha de modificar per que no fa el que ha de fer:
+    /*
+    en aquest mode no s’obrirà cap finestra del reproductor de vídeo. Ha de permetre
+executar el còdec a través de Shell scripts per avaluar de forma automatitzada el rendiment de
+l’algorisme implementat en funció dels diferents paràmetres de configuració.
+     */
     private boolean batch;
 
     /**

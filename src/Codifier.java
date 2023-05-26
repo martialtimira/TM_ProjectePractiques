@@ -106,7 +106,7 @@ public class Codifier {
         System.out.println("DONE");
     }
 
-    // TODO dividir la imatge entre N tiles general de manera que les tiles
+    // TODO dividir la imatge entre N tiles general de manera que les tiles, cada tessela ha de ser de 8x8 pixels
     private ArrayList<Tile> subdivideImageTiles(BufferedImage image) {
         ArrayList<Tile> tiles = new ArrayList<>();
 
