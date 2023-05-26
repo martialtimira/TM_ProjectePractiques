@@ -230,7 +230,6 @@ public class Decoder {
             });
 
             for(Pair p: tempImages) {
-                System.out.println("ORDERED IMAGES: " + p.getFirst());
                 this.images.add((BufferedImage) p.getSecond());
             }
         } catch (IOException e) {
