@@ -10,7 +10,7 @@ import ImageClass.Tile;
  */
 public class Codifier {
 
-    private final ArrayList<Pair<String, BufferedImage>> imageList;
+    private final ArrayList<Pair> imageList;
     private final int gop;
     private final int seekRange;
     private final int nTiles;
@@ -36,7 +36,7 @@ public class Codifier {
      * @param quality   Qualitat en la que fer el tall
      * @param outputPath Path de l'output
      */
-    public Codifier(ArrayList<Pair<String, BufferedImage>> imageList, int gop, int nTiles, int seekRange, int quality, String outputPath) {
+    public Codifier(ArrayList<Pair> imageList, int gop, int nTiles, int seekRange, int quality, String outputPath) {
         this.imageList = imageList;
         this.gop = gop;
         this.nTiles = nTiles;

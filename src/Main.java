@@ -70,7 +70,7 @@ public class Main {
     /**
      * Llista de fitxers a comprimir a l'output zip
      */
-    private ArrayList<Pair<String, BufferedImage>> image_list;
+    private ArrayList<Pair> image_list;
 
     /**
      * Variable global per tenir els fps dins el thread.
@@ -271,7 +271,7 @@ public class Main {
 
                             //En cas de que s'hagi introduït un output file per paràmetres, es guarda el frame a la llista de imatges.
                             if(outputName != null) {
-                                Pair<String, BufferedImage> pair = new Pair<>(entry.getName(), display_image);
+                                Pair pair = new Pair(entry.getName(), display_image);
                                 image_list.add(pair);
                             }
                         }
@@ -325,7 +325,7 @@ public class Main {
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(output_file));
             zip_output_stream = new ZipOutputStream(bos);
 
-            for(Pair<String, BufferedImage> pair: image_list) {
+            for(Pair pair: image_list) {
                 String file_name = pair.getFirst();
                 File image_file = new File(file_name);
                 BufferedImage display_image = pair.getSecond();

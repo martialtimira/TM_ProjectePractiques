@@ -4,10 +4,7 @@ import paramManager.MainCLIParameters;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -18,7 +15,7 @@ public class Decoder {
     public ArrayList<BufferedImage> images;
 
     public int reproCounter;
-    private final ArrayList<Pair<String, BufferedImage>> pairList;
+    private final ArrayList<Pair> pairList;
     public int gop;
     public int tileWidth;
     public int tileHeight;
@@ -58,7 +55,7 @@ public class Decoder {
         this.verbose = mainArgs.isVerbose();
     }
 
-    public ArrayList<Pair<String, BufferedImage>> decode() {
+    public ArrayList<Pair> decode() {
         System.out.println("DECODING");
         this.readZIP();
         //START DECODING THREAD
@@ -75,7 +72,7 @@ public class Decoder {
                     try {
                         String imageName = "frame" + counter + ".jpeg";
                         JPEGCompressor.compress(image, "Decompressed/", imageName);
-                        decoder.pairList.add(new Pair<>(imageName, image));
+                        decoder.pairList.add(new Pair(imageName, image));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -205,6 +202,7 @@ public class Decoder {
             File file = new File(inputPath);
             ZipFile zipFile = new ZipFile(file);
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            ArrayList<Pair> tempImages =  new ArrayList<>();
 
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
@@ -221,8 +219,21 @@ public class Decoder {
                     reader.close();
                 } else {
                     BufferedImage image = ImageIO.read(zipFile.getInputStream(entry));
-                    this.images.add(image);
+                    System.out.println("ADDING IMAGE: " + name);
+                    tempImages.add(new Pair(name, image));
+                    //this.images.add(image);
                 }
+            }
+            Collections.sort(tempImages, new Comparator<Pair>() {
+                @Override
+                public int compare(Pair pair1, Pair pair2) {
+                    return pair1.getFirst().compareTo(pair2.getFirst());
+                }
+            });
+
+            for(Pair p: tempImages) {
+                System.out.println("ORDERED IMAGES: " + p.getFirst());
+                this.images.add((BufferedImage) p.getSecond());
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

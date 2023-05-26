@@ -1,25 +1,27 @@
-public class Pair<T1, T2> {
-    private T1 first;
-    private T2 second;
+import java.awt.image.BufferedImage;
 
-    public Pair(T1 first, T2 second) {
+public class Pair {
+    private String first;
+    private BufferedImage second;
+
+    public Pair(String first, BufferedImage second) {
         this.first = first;
         this.second = second;
     }
 
-    public T1 getFirst() {
+    public String getFirst() {
         return first;
     }
 
-    public void setFirst(T1 first) {
+    public void setFirst(String first) {
         this.first = first;
     }
 
-    public T2 getSecond() {
+    public BufferedImage getSecond() {
         return second;
     }
 
-    public void setSecond(T2 second) {
+    public void setSecond(BufferedImage second) {
         this.second = second;
     }
 }
