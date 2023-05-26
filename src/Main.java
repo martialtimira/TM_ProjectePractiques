@@ -298,14 +298,14 @@ public class Main {
                 // Guardar les imatges filtrades en un zip (desactivar si es fa encoding, ja que la classe encoder ho guarda ella.)
                 if(processed_frame_counter == numFiles && outputName != null) {
                     if(encode) {
-                        System.out.println("ENCODING");
+                        System.out.println("\nENCODING");
                         Codifier codifier = new Codifier(image_list, gop, ntiles, seekRange, quality, outputName);
                         codifier.encode();
                         File inputFile = new File(file_path.toString());
                         File outputFile = new File(mainArgs.getOutputPath());
                         String inputFileLength = Utils.formatFileSize(inputFile.length());
                         String outputFileLength = Utils.formatFileSize(outputFile.length());
-                        System.out.println("Encoded " + file_path +"(" + inputFileLength + ") into " + mainArgs.getOutputPath()
+                        System.out.println("\nEncoded " + file_path +"(" + inputFileLength + ") into " + mainArgs.getOutputPath()
                         + "(" + outputFileLength + ")");
                         System.out.println("Achieved compression factor of: " + String.format("%.2f", (float)inputFile.length() / (float)outputFile.length()) + ":1");
                         if (mainArgs.getDecode()) {

@@ -49,7 +49,8 @@ public class FPSCounter {
      */
     public void printFPS() {
         double time = ((double)(System.currentTimeMillis() - this.start_time)) / 1000;
-        System.out.println(this.counter + " frames in " + time + "s, FPS: " + (this.counter/time));
+        // TODO Fix, la cadena de fps ha de ser tan llarga com la PB
+        System.out.println(this.counter + " frames in " + time + "s, FPS: " + (this.counter/time) + "               ");
     }
 
     /**

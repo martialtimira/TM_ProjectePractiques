@@ -211,6 +211,7 @@ public class Decoder {
                 ZipEntry entry = entries.nextElement();
                 String name = entry.getName();
                 if(name.equalsIgnoreCase("Compressed/coords.txt")) {
+                    // TODO read this binary
                     BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
                     String line;
                     while((line = reader.readLine()) != null) {

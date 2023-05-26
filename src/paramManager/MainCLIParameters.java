@@ -56,6 +56,7 @@ public class MainCLIParameters {
                 description = "Argument que indica si es volen mostrar els fps.")
     private boolean verbose;
 
+    // TODO el nombre se tesseles ha de ser una potencia de 2 > 8
     @Parameter(names = {"--nTiles"},
             validateWith = PositiveIntegerValidation.class,
             description = "<value> : Nombre de tessel·les en la qual dividir la imatge.")

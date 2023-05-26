@@ -1,3 +1,9 @@
+/* TODO enlloc de dividir el quadre desti en teseles regulars i buscar
+    coincidencies al quadre origen, ferho al reves.
+    Primer dividir el quadre origen en teseles qudriculades i despres
+    buscar coincidencies al quadre desti.
+ */
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -99,6 +105,7 @@ public class Codifier {
         System.out.println("DONE");
     }
 
+    // TODO dividir la imatge entre N tiles general de manera que les tiles
     private ArrayList<Tile> subdivideImageTiles(BufferedImage image) {
         ArrayList<Tile> tiles = new ArrayList<>();
 
@@ -185,6 +192,7 @@ public class Codifier {
             String name = "Compressed/coords.txt";
             BufferedWriter writer = new BufferedWriter(new FileWriter(name));
             for(Tile tile: this.tileList) {
+                // TODO make this binary i treure les parts innecesaries
                 writer.write(tile.getId() + " " + tile.getCoordX() + " " + tile.getCoordY() + "\n");
             }
             writer.flush();
