@@ -219,9 +219,7 @@ public class Decoder {
                     reader.close();
                 } else {
                     BufferedImage image = ImageIO.read(zipFile.getInputStream(entry));
-                    System.out.println("ADDING IMAGE: " + name);
                     tempImages.add(new Pair(name, image));
-                    //this.images.add(image);
                 }
             }
             Collections.sort(tempImages, new Comparator<Pair>() {
