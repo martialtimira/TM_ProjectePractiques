@@ -20,6 +20,7 @@ public class Codifier {
     private final int gop;
     private final int seekRange;
     private final int nTiles;
+    private int nTilesX, nTilesY;
     private final int quality;
     private int height;
     private int width;
@@ -112,8 +113,8 @@ public class Codifier {
         Tile tile;
 
         int counter = 0, counterY = 0, counterX = 0;
-        System.out.println("IMAGE DIMENSIONS: x = " + image.getWidth() + " y = " + image.getHeight());
-        System.out.println("TILE SIZE: " + this.nTiles);
+        //System.out.println("IMAGE DIMENSIONS: x = " + image.getWidth() + " y = " + image.getHeight());
+        //System.out.println("TILE SIZE: " + this.nTiles);
         for (float y = 0; y < (image.getHeight() - this.height); y += this.height) {
             for(float x = 0; x < (image.getWidth() - this.width); x += this.width) {
                 x = Math.round(x);
@@ -126,9 +127,11 @@ public class Codifier {
         }
 
         counterX = counter/counterY;
-        System.out.println("TOTAL Tiles Generated: " + counter);
-        System.out.println("XTiles: " + counterX);
-        System.out.println("YTiles: " + counterY);
+        this.nTilesX = counterX;
+        this.nTilesY = counterY;
+        //System.out.println("TOTAL Tiles Generated: " + counter);
+        //System.out.println("XTiles: " + counterX);
+        //System.out.println("YTiles: " + counterY);
         return tiles;
     }
 
@@ -144,8 +147,8 @@ public class Codifier {
             id = tile.getId();
 
             //Might need to change this for the new nTiles
-            x = ((int) Math.ceil(id/nTiles)) * height;
-            y = (id % nTiles) * width;
+            x = ((int) Math.ceil(id/nTilesX)) * height;
+            y = (id % nTilesY) * width;
 
             minX = Math.max((x - seekRange), 0);
             minY = Math.max((y - seekRange), 0);
