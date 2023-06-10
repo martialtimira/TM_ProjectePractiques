@@ -4,6 +4,7 @@ import paramManager.MainCLIParameters;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -210,17 +211,31 @@ public class Decoder {
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
                 String name = entry.getName();
-                if(name.equalsIgnoreCase("Compressed/coords.txt")) {
+                if(name.equalsIgnoreCase("Compressed/coords.bin")) {
+
                     // TODO read this binary
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
-                    String line;
-                    while((line = reader.readLine()) != null) {
-                        String[] lineElements = line.split(" ");
-                        ids.add(Integer.parseInt(lineElements[0]));
-                        xCoords.add(Integer.parseInt(lineElements[1]));
-                        yCoords.add(Integer.parseInt(lineElements[2]));
+                    //BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
+                    //String line;
+                    try(InputStream is = zipFile.getInputStream(entry)){
+                        DataInputStream fis = new DataInputStream(is);
+                        this.gop = Byte.toUnsignedInt(fis.readNBytes(1)[0]);
+                        this.tileHeight = Byte.toUnsignedInt(fis.readNBytes(1)[0]);
+                        this.tileWidth = this.tileHeight;
+                        byte[] read;
+                        byte[] empty = new byte[]{(byte) 0xFF, (byte) 0xFF};
+                        while ((read = fis.readNBytes(2)).length != 0) {
+
+                            if(Arrays.equals(read, empty)){
+                               fis.readNBytes(2);
+                            } else {
+                                ids.add((int) ByteBuffer.wrap(read).getShort());
+                                read = fis.readNBytes(2);
+                                xCoords.add((int) ByteBuffer.wrap(read).getShort());
+                                read = fis.readNBytes(2);
+                                yCoords.add((int) ByteBuffer.wrap(read).getShort());
+                            }
+                        }
                     }
-                    reader.close();
                 } else {
                     BufferedImage image = ImageIO.read(zipFile.getInputStream(entry));
                     tempImages.add(new Pair(name, image));

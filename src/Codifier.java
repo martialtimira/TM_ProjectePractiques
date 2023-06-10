@@ -237,9 +237,8 @@ public class Codifier {
     private byte[] getHeader() {
         byte[] gopB = ByteBuffer.allocate(4).putInt(gop).array();
         byte[] tilesB = ByteBuffer.allocate(4).putInt(nTiles).array();
-        byte[] sizeB = ByteBuffer.allocate(4).putInt(imageList.size()).array();
 
-        return new byte[]{gopB[3], tilesB[3], sizeB[2], sizeB[3]};
+        return new byte[]{gopB[3], tilesB[3]};
     }
 
 
