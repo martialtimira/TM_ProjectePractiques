@@ -87,12 +87,11 @@ public class Codifier {
         ImageFrame n, n_1;
         for(int p = 0; p < gopListList.size(); p++) {
             ArrayList<ImageFrame> currentGOPList = gopListList.get(p);
-            for(int z = 0; z < currentGOPList.size() - 1; z++) {
-                n = currentGOPList.get(z);
-                if(z == 0) {
-                    this.compressedFrameList.add(n);
-                }
-                n_1 = currentGOPList.get(z + 1);
+            n = currentGOPList.get(0);
+            this.compressedFrameList.add(n);
+            //System.out.println("Base image ID: " + n.getId());
+            for(int z = 1; z < currentGOPList.size(); z++) {
+                n_1 = currentGOPList.get(z);
 
                 n.setTiles(subdivideImageTiles(n.getImage()));
                 n.setTiles(findEqualTiles(n, n_1.getImage()));
@@ -120,6 +119,8 @@ public class Codifier {
                 x = Math.round(x);
                 y = Math.round(y);
                 tile = new Tile(image.getSubimage((int)x, (int)y, this.width, this.height), counter);
+                tile.setX((int)x);
+                tile.setY((int)y);
                 tiles.add(tile);
                 counter++;
             }
@@ -238,12 +239,18 @@ public class Codifier {
     private BufferedImage setColorPFrame(ArrayList<Tile> tiles, BufferedImage pFrame) {
         BufferedImage result = pFrame;
         tiles.forEach((tile) -> {
+            int imageX = tile.getX();
+            int imageY = tile.getY();
             int x = tile.getCoordX();
             int y = tile.getCoordY();
+            //System.out.println("imageX: " + imageX + " x: " + x);
+            //System.out.println("imageY: " + imageY + " y: " + y);
             if (x != -1 && y != -1) {
                 Color color = getAverageColor(tile.getTile());
-                for(int xCoord = x; xCoord < (x+height); xCoord++) {
-                    for (int yCoord = y; yCoord < (y+width); yCoord++) {
+                for(int xCoord = imageY; xCoord < (imageY+height); xCoord++) {
+                    for (int yCoord = imageX; yCoord < (imageX+width); yCoord++) {
+                        //System.out.println("IMAGE: " + pFrame.getWidth() + "Y: " + pFrame.getHeight());
+                        //System.out.println("X: " + xCoord + "Y: " + yCoord);
                         result.setRGB(yCoord, xCoord, color.getRGB());
                     }
                 }
