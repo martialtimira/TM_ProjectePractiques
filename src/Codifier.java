@@ -7,6 +7,7 @@
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import ImageClass.ImageFrame;
 import ImageClass.Tile;
@@ -172,8 +173,7 @@ public class Codifier {
             if(maxPSNR != Float.MIN_VALUE) {
                 tile.setCoordX(xMaxValue);
                 tile.setCoordY(yMaxValue);
-            }
-            else {
+            }else {
                 tile.setCoordX(-1);
                 tile.setCoordY(-1);
             }
@@ -200,18 +200,48 @@ public class Codifier {
     }
 
     private void createCoordFile() {
-        try {
-            String name = "Compressed/coords.txt";
-            BufferedWriter writer = new BufferedWriter(new FileWriter(name));
-            for(Tile tile: this.tileList) {
-                writer.write(tile.getId() + " " + tile.getCoordX() + " " + tile.getCoordY() + "\n");
+        String name = "Compressed/coords.bin";
+        int last = 0;
+        boolean added = false;
+        try(FileOutputStream fos = new FileOutputStream(name)) {
+            fos.write(getHeader());
+
+            for(Tile tile : this.tileList) {
+                if (tile.getId() < last) {
+                    if(!added) {
+                        fos.write(new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF}); // Frame sense coincidences
+                    }
+                    else added = false;
+                }
+                if(tile.getCoordX() != -1 && tile.getCoordY() != -1) {
+                    fos.write(tileToBin(tile));
+                    last = tile.getId();
+                    added = true;
+                }
             }
-            writer.flush();
-            writer.close();
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
+    private byte[] tileToBin(Tile tile) {
+        byte[] idB = ByteBuffer.allocate(4).putInt(tile.getId()).array();
+        byte[] xB = ByteBuffer.allocate(4).putInt(tile.getCoordX()).array();
+        byte[] yB = ByteBuffer.allocate(4).putInt(tile.getCoordY()).array();
+
+        return new byte[]{idB[2], idB[3], xB[2], xB[3], yB[2], yB[3]};
+    }
+
+
+    private byte[] getHeader() {
+        byte[] gopB = ByteBuffer.allocate(4).putInt(gop).array();
+        byte[] tilesB = ByteBuffer.allocate(4).putInt(nTiles).array();
+        byte[] sizeB = ByteBuffer.allocate(4).putInt(imageList.size()).array();
+
+        return new byte[]{gopB[3], tilesB[3], sizeB[2], sizeB[3]};
+    }
+
 
     private Color getAverageColor(BufferedImage image) {
         Color color;
