@@ -45,6 +45,8 @@ public class Codifier {
     public Codifier(ArrayList<Pair> imageList, int gop, int nTiles, int seekRange, int quality, String outputPath) {
         this.imageList = imageList;
         this.gop = gop;
+        this.width =  nTiles;
+        this.height = nTiles;
         this.nTiles = nTiles;
         this.seekRange = seekRange;
         this.quality = quality;
@@ -90,8 +92,6 @@ public class Codifier {
                     this.compressedFrameList.add(n);
                 }
                 n_1 = currentGOPList.get(z + 1);
-                this.width = n_1.getImage().getWidth() / this.nTiles;
-                this.height = n_1.getImage().getHeight() / this.nTiles;
 
                 n.setTiles(subdivideImageTiles(n.getImage()));
                 n.setTiles(findEqualTiles(n, n_1.getImage()));
@@ -111,17 +111,24 @@ public class Codifier {
 
         Tile tile;
 
-        int counter = 0;
-        for (float y = 0; y < Math.round(image.getHeight()); y += this.height) {
-            for(float x = 0; x < Math.round(image.getWidth()); x += this.width) {
+        int counter = 0, counterY = 0, counterX = 0;
+        System.out.println("IMAGE DIMENSIONS: x = " + image.getWidth() + " y = " + image.getHeight());
+        System.out.println("TILE SIZE: " + this.nTiles);
+        for (float y = 0; y < (image.getHeight() - this.height); y += this.height) {
+            for(float x = 0; x < (image.getWidth() - this.width); x += this.width) {
                 x = Math.round(x);
                 y = Math.round(y);
                 tile = new Tile(image.getSubimage((int)x, (int)y, this.width, this.height), counter);
                 tiles.add(tile);
                 counter++;
             }
+            counterY++;
         }
 
+        counterX = counter/counterY;
+        System.out.println("TOTAL Tiles Generated: " + counter);
+        System.out.println("XTiles: " + counterX);
+        System.out.println("YTiles: " + counterY);
         return tiles;
     }
 
@@ -136,6 +143,7 @@ public class Codifier {
             maxPSNR = Float.MIN_VALUE;
             id = tile.getId();
 
+            //Might need to change this for the new nTiles
             x = ((int) Math.ceil(id/nTiles)) * height;
             y = (id % nTiles) * width;
 
