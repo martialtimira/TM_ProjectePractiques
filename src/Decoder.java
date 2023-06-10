@@ -144,8 +144,8 @@ public class Decoder {
         }
     }
     private void buildImages() {
-        this.tileWidth = this.images.get(0).getWidth() / nTiles;
-        this.tileHeight = this.images.get(0).getHeight() / nTiles;
+        this.tileWidth = nTiles;
+        this.tileHeight = nTiles;
         BufferedImage iFrame = null;
         int idMultiplier = 0;
         for(int i = 0; i < this.images.size() - 1; i++) {
@@ -164,7 +164,7 @@ public class Decoder {
     }
 
     private void buildPframes(BufferedImage iFrame, BufferedImage pFrame, int idMultiplier) {
-        ArrayList<Tile> tiles = generateMacroBlocks(iFrame);
+        ArrayList<Tile> tiles = generateMacroBlocks(pFrame);
         int startingId = 0;
         int lastId = this.nTiles * this.nTiles;
         if (idMultiplier != 0) {
@@ -172,14 +172,24 @@ public class Decoder {
             lastId += Math.min(idMultiplier, ids.size());
         }
         for(int i = startingId; i < lastId; i++) {
+            //System.out.println("TILE N" + i);
             Tile tile = tiles.get(ids.get(i));
             int x = xCoords.get(i);
             int y = yCoords.get(i);
+            int tileX = tile.getX();
+            int tileY = tile.getY();
             if(x != -1 && y != -1) {
+                //System.out.println("COORDS in Iframe: " + x + ", " + y);
+                BufferedImage baseSubimage = iFrame.getSubimage(x, y, tileHeight, tileWidth);
+                //System.out.println("Iframe subimage" + baseSubimage.getWidth() + ", " + baseSubimage.getHeight());
+                //System.out.println("X: " + tileX + " Y: " + tileY);
+                //System.out.println("PFRAME DIM: " + pFrame.getWidth()+ ", " + pFrame.getHeight());
                 for(int j = 0; j < this.tileHeight; j++) {
                     for(int k = 0; k < this.tileWidth; k++) {
-                        int rgb = tile.getTile().getRGB(k, j);
-                        pFrame.setRGB(k + y, j+x, rgb);
+                        int rgb = baseSubimage.getRGB(k, j);
+                        //int rgb = tile.getTile().getRGB(k, j);
+                        //System.out.println("WRITING RGB ON " + (k+tileY) + ", "+ (j+tileX));
+                        pFrame.setRGB(k + tileX, j+tileY, rgb);
                     }
                 }
             }
@@ -190,9 +200,11 @@ public class Decoder {
         ArrayList<Tile> tiles = new ArrayList<>();
         Tile tile;
         int count = 0;
-        for(int y = 0; y < image.getHeight(); y += this.tileHeight) {
-            for(int x = 0; x < image.getWidth(); x += this.tileWidth) {
+        for(int y = 0; y < image.getHeight() - this.tileHeight; y += this.tileHeight) {
+            for(int x = 0; x < image.getWidth() - this.tileWidth; x += this.tileWidth) {
                 tile = new Tile(image.getSubimage(x, y, this.tileWidth, this.tileHeight), count);
+                tile.setX(x);
+                tile.setY(y);
                 tiles.add(tile);
                 count++;
             }
