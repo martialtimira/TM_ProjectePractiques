@@ -15,6 +15,7 @@ public class ImageFrame {
     public ImageFrame(BufferedImage image, int id) {
         this.image = image;
         this.tiles = new ArrayList<>();
+        this.id = id;
     }
 
     public BufferedImage getImage() {

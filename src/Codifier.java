@@ -74,7 +74,8 @@ public class Codifier {
                 }
                 gopList = new ArrayList<>();
             }
-            gopList.add(new ImageFrame(imageList.get(i).getSecond(), i));
+            ImageFrame iframe = new ImageFrame(imageList.get(i).getSecond(), i);
+            gopList.add(iframe);
         }
     }
 
@@ -89,7 +90,6 @@ public class Codifier {
                     this.compressedFrameList.add(n);
                 }
                 n_1 = currentGOPList.get(z + 1);
-                //CHANGE THIS, nTiles NEEDS TO BE THE SIZE OF THE TILES AND MULTIPLE OF 8.
                 this.width = n_1.getImage().getWidth() / this.nTiles;
                 this.height = n_1.getImage().getHeight() / this.nTiles;
 
@@ -106,7 +106,6 @@ public class Codifier {
         System.out.println("DONE");
     }
 
-    // TODO dividir la imatge entre N tiles general de manera que les tiles, cada tessela ha de ser de 8x8 pixels
     private ArrayList<Tile> subdivideImageTiles(BufferedImage image) {
         ArrayList<Tile> tiles = new ArrayList<>();
 
@@ -133,7 +132,6 @@ public class Codifier {
         int x, y, minX, maxX, minY, maxY, id;
         ArrayList<Tile> resultTiles = new ArrayList<>();
 
-        //CHANGE IS TO IT ITERATES FROM pFrame.getTiles()
         for (Tile tile: iFrame.getTiles()) {
             maxPSNR = Float.MIN_VALUE;
             id = tile.getId();
@@ -149,7 +147,6 @@ public class Codifier {
 
             for(int i = minX; i <= maxX - height; i++) {
                 for(int j = minY; j <= maxY - width; j++) {
-                    //CHANGE IT SO IT GETS THE SUBIMAGE FROM iFrame instead of pFrame
                     float psnr = getPSNRScore(tile, pFrame.getSubimage(j, i, width, height));
                     //System.out.println("PSNR: " + psnr);
                     if (psnr > maxPSNR && psnr >= quality) {
@@ -165,7 +162,6 @@ public class Codifier {
                 tile.setCoordY(yMaxValue);
             }
             else {
-                //REMOVE THIS, CHANGE THE COORDS.TXT FILE SO IT DOESNT SAVE EXTRA STUFF, ALSO SAVE IT AS a short and not a txt
                 tile.setCoordX(-1);
                 tile.setCoordY(-1);
             }
@@ -196,7 +192,6 @@ public class Codifier {
             String name = "Compressed/coords.txt";
             BufferedWriter writer = new BufferedWriter(new FileWriter(name));
             for(Tile tile: this.tileList) {
-                // TODO make this binary i treure les parts innecesaries
                 writer.write(tile.getId() + " " + tile.getCoordX() + " " + tile.getCoordY() + "\n");
             }
             writer.flush();
