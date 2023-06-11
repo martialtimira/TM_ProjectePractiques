@@ -113,27 +113,26 @@ public class Codifier {
         Tile tile;
 
         int counter = 0, counterY = 0, counterX = 0;
-        //System.out.println("IMAGE DIMENSIONS: x = " + image.getWidth() + " y = " + image.getHeight());
-        //System.out.println("TILE SIZE: " + this.nTiles);
-        for (float y = 0; y < (image.getHeight() - this.height); y += this.height) {
-            for(float x = 0; x < (image.getWidth() - this.width); x += this.width) {
+        for (float y = 0; y < image.getHeight(); y += this.height) {
+            for(float x = 0; x < image.getWidth(); x += this.width) {
                 x = Math.round(x);
                 y = Math.round(y);
-                tile = new Tile(image.getSubimage((int)x, (int)y, this.width, this.height), counter);
-                tile.setX((int)x);
-                tile.setY((int)y);
-                tiles.add(tile);
-                counter++;
+                if(x+this.height <= image.getWidth() && y+this.width <= image.getHeight()){
+                    tile = new Tile(image.getSubimage((int)x, (int)y, this.width, this.height), counter);
+                    tile.setX((int)x);
+                    tile.setY((int)y);
+                    tiles.add(tile);
+                    counter++;
+                }
             }
-            counterY++;
+            if(y+this.width <= image.getHeight()) {
+                counterY++;
+            }
         }
 
         counterX = counter/counterY;
         this.nTilesX = counterX;
         this.nTilesY = counterY;
-        //System.out.println("TOTAL Tiles Generated: " + counter);
-        //System.out.println("XTiles: " + counterX);
-        //System.out.println("YTiles: " + counterY);
         return tiles;
     }
 
@@ -200,45 +199,32 @@ public class Codifier {
     }
 
     private void createCoordFile() {
-        String name = "Compressed/coords.bin";
-        int last = 0;
-        boolean added = false;
-        try(FileOutputStream fos = new FileOutputStream(name)) {
-            fos.write(getHeader());
-
+        String name = "Compressed/coords.txt";
+        int frame = 1, count = 0;
+        int tilesXframe = (imageList.get(0).getSecond().getHeight() * imageList.get(0).getSecond().getWidth())
+                / (nTiles * nTiles);
+        try(BufferedWriter bf = new BufferedWriter(new FileWriter(name))) {
+            bf.write(gop + " " + nTiles + "\n");
             for(Tile tile : this.tileList) {
-                if (tile.getId() < last) {
-                    if(!added) {
-                        fos.write(new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF}); // Frame sense coincidences
-                    }
-                    else added = false;
-                }
                 if(tile.getCoordX() != -1 && tile.getCoordY() != -1) {
-                    fos.write(tileToBin(tile));
-                    last = tile.getId();
-                    added = true;
+                    bf.write(frame + " " + tile.getId() + " " + tile.getCoordX() + " " + tile.getCoordY() + "\n");
                 }
+                count++;
+
+                if(count == tilesXframe) {
+                    count = 0;
+                    frame++;
+
+                    if(frame%gop == 0) frame++;
+                }
+
             }
+
+            bf.flush();
 
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private byte[] tileToBin(Tile tile) {
-        byte[] idB = ByteBuffer.allocate(4).putInt(tile.getId()).array();
-        byte[] xB = ByteBuffer.allocate(4).putInt(tile.getCoordX()).array();
-        byte[] yB = ByteBuffer.allocate(4).putInt(tile.getCoordY()).array();
-
-        return new byte[]{idB[2], idB[3], xB[2], xB[3], yB[2], yB[3]};
-    }
-
-
-    private byte[] getHeader() {
-        byte[] gopB = ByteBuffer.allocate(4).putInt(gop).array();
-        byte[] tilesB = ByteBuffer.allocate(4).putInt(nTiles).array();
-
-        return new byte[]{gopB[3], tilesB[3]};
     }
 
 

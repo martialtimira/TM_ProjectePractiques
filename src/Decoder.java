@@ -1,4 +1,5 @@
 import ImageClass.Tile;
+import ImageClass.Coords;
 import paramManager.MainCLIParameters;
 
 import javax.imageio.ImageIO;
@@ -10,11 +11,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class Decoder {
-    public ArrayList<Integer> ids;
-    public ArrayList<Integer> xCoords;
-    public ArrayList<Integer> yCoords;
     public ArrayList<BufferedImage> images;
-
     public int reproCounter;
     private final ArrayList<Pair> pairList;
     public int gop;
@@ -22,7 +19,6 @@ public class Decoder {
     public int tileHeight;
     public int nTiles;
     public int fps;
-
     public progressBar pb;
     public FPSCounter fpsCounter;
     public Visor visor;
@@ -34,6 +30,8 @@ public class Decoder {
     private final boolean batch;
     private final boolean verbose;
     private final Utils utils;
+
+    private ArrayList<Coords> coords;
 
     public Decoder(MainCLIParameters mainArgs, Visor visor) {
         this.outputPath = mainArgs.getOutputPath();
@@ -47,9 +45,7 @@ public class Decoder {
         }
         this.gop = mainArgs.getGOP();
         this.nTiles = mainArgs.getnTiles();
-        this.ids = new ArrayList<>();
-        this.xCoords = new ArrayList<>();
-        this.yCoords = new ArrayList<>();
+        this.coords = new ArrayList<>();
         this.images = new ArrayList<>();
         this.pairList = new ArrayList<>();
         this.utils = new Utils();
@@ -144,6 +140,14 @@ public class Decoder {
             }
         }
     }
+
+    private void buildImages() {
+        BufferedImage reference = null, end = null;
+        for(Coords cord: coords) {
+
+        }
+    }
+    /*
     private void buildImages() {
         this.tileWidth = this.images.get(0).getWidth() / nTiles;
         this.tileHeight = this.images.get(0).getHeight() / nTiles;
@@ -163,6 +167,7 @@ public class Decoder {
             }
         }
     }
+    */
 
     private void buildPframes(BufferedImage iFrame, BufferedImage pFrame, int idMultiplier) {
         ArrayList<Tile> tiles = generateMacroBlocks(iFrame);
@@ -181,11 +186,14 @@ public class Decoder {
                     for(int k = 0; k < this.tileWidth; k++) {
                         int rgb = tile.getTile().getRGB(k, j);
                         pFrame.setRGB(k + y, j+x, rgb);
+                        pFrame.setRGB();
                     }
                 }
             }
         }
     }
+
+     */
 
     private ArrayList<Tile> generateMacroBlocks(BufferedImage image) {
         ArrayList<Tile> tiles = new ArrayList<>();
@@ -207,35 +215,38 @@ public class Decoder {
             ZipFile zipFile = new ZipFile(file);
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
             ArrayList<Pair> tempImages =  new ArrayList<>();
+            String[] lineElements;
+            int group = 0, counter = 0;
 
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
                 String name = entry.getName();
-                if(name.equalsIgnoreCase("Compressed/coords.bin")) {
+                if(name.equalsIgnoreCase("Compressed/coords.txt")) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
+                    String line;
+                    lineElements = reader.readLine().split(" ");
+                    gop = Integer.parseInt(lineElements[0]);
+                    tileWidth = Integer.parseInt(lineElements[1]);
+                    tileHeight = Integer.parseInt(lineElements[1]);
 
-                    // TODO read this binary
-                    //BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
-                    //String line;
-                    try(InputStream is = zipFile.getInputStream(entry)){
-                        DataInputStream fis = new DataInputStream(is);
-                        this.gop = Byte.toUnsignedInt(fis.readNBytes(1)[0]);
-                        this.tileHeight = Byte.toUnsignedInt(fis.readNBytes(1)[0]);
-                        this.tileWidth = this.tileHeight;
-                        byte[] read;
-                        byte[] empty = new byte[]{(byte) 0xFF, (byte) 0xFF};
-                        while ((read = fis.readNBytes(2)).length != 0) {
+                    while((line = reader.readLine()) != null) {
+                        lineElements = line.split(" ");
 
-                            if(Arrays.equals(read, empty)){
-                               fis.readNBytes(2);
-                            } else {
-                                ids.add((int) ByteBuffer.wrap(read).getShort());
-                                read = fis.readNBytes(2);
-                                xCoords.add((int) ByteBuffer.wrap(read).getShort());
-                                read = fis.readNBytes(2);
-                                yCoords.add((int) ByteBuffer.wrap(read).getShort());
-                            }
+                        coords.add(new Coords(Integer.parseInt(lineElements[0]), // Frame
+                                group,                                          // reference frame
+                                Integer.parseInt(lineElements[1]),              // tile Id
+                                Integer.parseInt(lineElements[2]),              // x
+                                Integer.parseInt(lineElements[3])));            // y
+
+                        counter++;
+
+                        if(counter == gop-1) {
+                            group++;
+                            counter = 0;
                         }
+
                     }
+                    reader.close();
                 } else {
                     BufferedImage image = ImageIO.read(zipFile.getInputStream(entry));
                     tempImages.add(new Pair(name, image));
