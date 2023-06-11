@@ -1,9 +1,11 @@
 import ImageClass.Tile;
+import com.beust.ah.A;
 import paramManager.MainCLIParameters;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -15,6 +17,10 @@ public class Decoder {
     public ArrayList<BufferedImage> images;
 
     public int reproCounter;
+
+    private ArrayList<ArrayList> idsListList;
+    private ArrayList<ArrayList> xCoordsListList;
+    private ArrayList<ArrayList> yCoordsListList;
     private final ArrayList<Pair> pairList;
     public int gop;
     public int tileWidth;
@@ -56,6 +62,9 @@ public class Decoder {
         this.reproCounter = 0;
         this.batch = mainArgs.hasWindow();
         this.verbose = mainArgs.isVerbose();
+        this.idsListList = new ArrayList<>();
+        this.xCoordsListList = new ArrayList<>();
+        this.yCoordsListList = new ArrayList<>();
     }
 
     public ArrayList<Pair> decode() {
@@ -148,49 +157,39 @@ public class Decoder {
         this.tileHeight = nTiles;
         BufferedImage iFrame = null;
         int idMultiplier = 0;
-        for(int i = 0; i < this.images.size() - 1; i++) {
+        int counter = 0;
+        for(int i = 0; i < this.images.size(); i++) {
             BufferedImage currentFrame = this.images.get(i);
             if (i % this.gop == 0) {
                 iFrame = currentFrame;
-            } else if(i == this.images.size() - 2) {
-                this.buildPframes(iFrame, currentFrame, idMultiplier);
-                idMultiplier += this.nTiles * this.nTiles;
-                this.buildPframes(iFrame, this.images.get(i+1), idMultiplier);
             } else {
-                this.buildPframes(iFrame, currentFrame, idMultiplier);
-                idMultiplier += this.nTiles * this.nTiles;
+                this.buildPframes(iFrame, currentFrame, this.idsListList.get(counter), this.xCoordsListList.get(counter), this.yCoordsListList.get(counter));
+                counter++;
             }
         }
+
+        System.out.println("FINAL COUNTER: " + counter);
     }
 
-    private void buildPframes(BufferedImage iFrame, BufferedImage pFrame, int idMultiplier) {
+    private void buildPframes(BufferedImage iFrame, BufferedImage pFrame, ArrayList<Integer> idList, ArrayList<Integer> xCoordList, ArrayList<Integer> yCoordList) {
         ArrayList<Tile> tiles = generateMacroBlocks(pFrame);
-        int startingId = 0;
-        int lastId = this.nTiles * this.nTiles;
-        if (idMultiplier != 0) {
-            startingId = idMultiplier;
-            lastId += Math.min(idMultiplier, ids.size());
-        }
-        for(int i = startingId; i < lastId; i++) {
-            //System.out.println("TILE N" + i);
-            Tile tile = tiles.get(ids.get(i));
-            int x = xCoords.get(i);
-            int y = yCoords.get(i);
-            int tileX = tile.getX();
-            int tileY = tile.getY();
-            if(x != -1 && y != -1) {
-                //System.out.println("COORDS in Iframe: " + x + ", " + y);
-                BufferedImage baseSubimage = iFrame.getSubimage(x, y, tileHeight, tileWidth);
-                //System.out.println("Iframe subimage" + baseSubimage.getWidth() + ", " + baseSubimage.getHeight());
-                //System.out.println("X: " + tileX + " Y: " + tileY);
-                //System.out.println("PFRAME DIM: " + pFrame.getWidth()+ ", " + pFrame.getHeight());
-                for(int j = 0; j < this.tileHeight; j++) {
-                    for(int k = 0; k < this.tileWidth; k++) {
-                        int rgb = baseSubimage.getRGB(k, j);
-                        //int rgb = tile.getTile().getRGB(k, j);
-                        //System.out.println("WRITING RGB ON " + (k+tileY) + ", "+ (j+tileX));
-                        pFrame.setRGB(k + tileX, j+tileY, rgb);
-                    }
+        //System.out.println("TILES: " + tiles.size());
+        //System.out.println("IDLISTSIZE: " + idList.size());
+        int tileID, x, y;
+        for(int i = 0; i < idList.size(); i++) {
+            //System.out.println("CURRENT TILE ID: " + idList.get(i));
+            //get tile, xcoords, and ycoords, and then do the same as the old method
+            tileID = idList.get(i);
+            x = xCoordList.get(i);
+            y = yCoordList.get(i);
+            Tile tile = tiles.get(tileID);
+            for(int j = 0; j < this.tileHeight; j++) {
+                for(int k = 0; k < this.tileWidth; k++) {
+                    //System.out.println("IFrameDimensions: (" + iFrame.getWidth() + ", " + iFrame.getHeight() + ")");
+                    //System.out.println("GETTING RGB FROM (" + (x+k) + ", " + (y+j) + ") on IFrame");
+                    //System.out.println("Putting it in (" + (tile.getX()+k) + ", " + (tile.getY()+j) + ") on pFrame");
+                    int rgb = iFrame.getRGB(y+j, x+k);
+                    pFrame.setRGB((tile.getX()+k), (tile.getY()+j), rgb);
                 }
             }
         }
@@ -199,14 +198,20 @@ public class Decoder {
     private ArrayList<Tile> generateMacroBlocks(BufferedImage image) {
         ArrayList<Tile> tiles = new ArrayList<>();
         Tile tile;
-        int count = 0;
-        for(int y = 0; y < image.getHeight() - this.tileHeight; y += this.tileHeight) {
-            for(int x = 0; x < image.getWidth() - this.tileWidth; x += this.tileWidth) {
-                tile = new Tile(image.getSubimage(x, y, this.tileWidth, this.tileHeight), count);
-                tile.setX(x);
-                tile.setY(y);
-                tiles.add(tile);
-                count++;
+        int count = 0, counterY = 0;
+        for(int y = 0; y < image.getHeight(); y += this.tileHeight) {
+            for(int x = 0; x < image.getWidth(); x += this.tileWidth) {
+                if(x+this.tileHeight <= image.getWidth() && y+this.tileWidth <= image.getHeight()) {
+                    tile = new Tile(image.getSubimage(x, y, this.tileWidth, this.tileHeight), count);
+                    tile.setX(x);
+                    tile.setY(y);
+                    tiles.add(tile);
+                    count++;
+                }
+            }
+
+            if(y+this.tileWidth <= image.getHeight()) {
+                counterY++;
             }
         }
         return tiles;
@@ -226,12 +231,32 @@ public class Decoder {
                     // TODO read this binary
                     BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
                     String line;
+                    line = reader.readLine();
+                    String[] lineElements = line.split(" ");
+                    this.gop = Integer.parseInt(lineElements[0]);
+                    this.nTiles = Integer.parseInt(lineElements[1]);
+                    System.out.println("GOP: " + this.gop + " nTiles: " + this.nTiles);
+                    int currentFrame = 1;
+                    int frameRead = 0;
                     while((line = reader.readLine()) != null) {
-                        String[] lineElements = line.split(" ");
-                        ids.add(Integer.parseInt(lineElements[0]));
-                        xCoords.add(Integer.parseInt(lineElements[1]));
-                        yCoords.add(Integer.parseInt(lineElements[2]));
+                        lineElements = line.split(" ");
+                        frameRead = Integer.parseInt(lineElements[0]);
+                        if (frameRead != currentFrame) {
+                            idsListList.add(ids);
+                            xCoordsListList.add(xCoords);
+                            yCoordsListList.add(yCoords);
+                            ids = new ArrayList<>();
+                            xCoords = new ArrayList<>();
+                            yCoords = new ArrayList<>();
+                            currentFrame = frameRead;
+                        }
+                        ids.add(Integer.parseInt(lineElements[1]));
+                        xCoords.add(Integer.parseInt(lineElements[2]));
+                        yCoords.add(Integer.parseInt(lineElements[3]));
                     }
+                    idsListList.add(ids);
+                    xCoordsListList.add(xCoords);
+                    yCoordsListList.add(yCoords);
                     reader.close();
                 } else {
                     BufferedImage image = ImageIO.read(zipFile.getInputStream(entry));
