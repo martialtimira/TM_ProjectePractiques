@@ -256,6 +256,7 @@ public class Codifier {
     }
     private BufferedImage setColorPFrame(ArrayList<Tile> tiles, BufferedImage pFrame) {
         BufferedImage result = pFrame;
+        Color color = getAverageColor(pFrame);
         tiles.forEach((tile) -> {
             int imageX = tile.getX();
             int imageY = tile.getY();
@@ -264,7 +265,6 @@ public class Codifier {
             //System.out.println("imageX: " + imageX + " x: " + x);
             //System.out.println("imageY: " + imageY + " y: " + y);
             if (x != -1 && y != -1) {
-                Color color = getAverageColor(tile.getTile());
                 for(int xCoord = imageY; xCoord < (imageY+height); xCoord++) {
                     for (int yCoord = imageX; yCoord < (imageX+width); yCoord++) {
                         //System.out.println("IMAGE: " + pFrame.getWidth() + "Y: " + pFrame.getHeight());
