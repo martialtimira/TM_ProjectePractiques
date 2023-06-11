@@ -20,6 +20,7 @@ public class Codifier {
     private final int gop;
     private final int seekRange;
     private final int nTiles;
+    private int nTilesX, nTilesY;
     private final int quality;
     private int height;
     private int width;
@@ -45,6 +46,8 @@ public class Codifier {
     public Codifier(ArrayList<Pair> imageList, int gop, int nTiles, int seekRange, int quality, String outputPath) {
         this.imageList = imageList;
         this.gop = gop;
+        this.width =  nTiles;
+        this.height = nTiles;
         this.nTiles = nTiles;
         this.seekRange = seekRange;
         this.quality = quality;
@@ -84,14 +87,11 @@ public class Codifier {
         ImageFrame n, n_1;
         for(int p = 0; p < gopListList.size(); p++) {
             ArrayList<ImageFrame> currentGOPList = gopListList.get(p);
-            for(int z = 0; z < currentGOPList.size() - 1; z++) {
-                n = currentGOPList.get(z);
-                if(z == 0) {
-                    this.compressedFrameList.add(n);
-                }
-                n_1 = currentGOPList.get(z + 1);
-                this.width = n_1.getImage().getWidth() / this.nTiles;
-                this.height = n_1.getImage().getHeight() / this.nTiles;
+            n = currentGOPList.get(0);
+            this.compressedFrameList.add(n);
+            //System.out.println("Base image ID: " + n.getId());
+            for(int z = 1; z < currentGOPList.size(); z++) {
+                n_1 = currentGOPList.get(z);
 
                 n.setTiles(subdivideImageTiles(n.getImage()));
                 n.setTiles(findEqualTiles(n, n_1.getImage()));
@@ -111,17 +111,32 @@ public class Codifier {
 
         Tile tile;
 
-        int counter = 0;
-        for (float y = 0; y < Math.round(image.getHeight()); y += this.height) {
-            for(float x = 0; x < Math.round(image.getWidth()); x += this.width) {
+        int counter = 0, counterY = 0, counterX = 0;
+        //System.out.println("IMAGE DIMENSIONS: x = " + image.getWidth() + " y = " + image.getHeight());
+        //System.out.println("TILE SIZE: " + this.nTiles);
+        for (float y = 0; y < image.getHeight(); y += this.height) {
+            for(float x = 0; x < image.getWidth(); x += this.width) {
                 x = Math.round(x);
                 y = Math.round(y);
-                tile = new Tile(image.getSubimage((int)x, (int)y, this.width, this.height), counter);
-                tiles.add(tile);
-                counter++;
+                if(x+this.height <= image.getWidth() && y+this.width <= image.getHeight()){
+                    tile = new Tile(image.getSubimage((int)x, (int)y, this.width, this.height), counter);
+                    tile.setX((int)x);
+                    tile.setY((int)y);
+                    tiles.add(tile);
+                    counter++;
+                }
+            }
+            if(y+this.width <= image.getHeight()) {
+                counterY++;
             }
         }
 
+        counterX = counter/counterY;
+        this.nTilesX = counterX;
+        this.nTilesY = counterY;
+        //System.out.println("TOTAL Tiles Generated: " + counter);
+        //System.out.println("XTiles: " + counterX);
+        //System.out.println("YTiles: " + counterY);
         return tiles;
     }
 
@@ -136,8 +151,9 @@ public class Codifier {
             maxPSNR = Float.MIN_VALUE;
             id = tile.getId();
 
-            x = ((int) Math.ceil(id/nTiles)) * height;
-            y = (id % nTiles) * width;
+            //Might need to change this for the new nTiles
+            x = ((int) Math.ceil(id/nTilesX)) * height;
+            y = (id % nTilesY) * width;
 
             minX = Math.max((x - seekRange), 0);
             minY = Math.max((y - seekRange), 0);
@@ -188,14 +204,28 @@ public class Codifier {
     }
 
     private void createCoordFile() {
-        try {
-            String name = "Compressed/coords.txt";
-            BufferedWriter writer = new BufferedWriter(new FileWriter(name));
-            for(Tile tile: this.tileList) {
-                writer.write(tile.getId() + " " + tile.getCoordX() + " " + tile.getCoordY() + "\n");
+        String name = "Compressed/coords.txt";
+        int frame = 1, count = 0;
+        int tilesXframe = (imageList.get(0).getSecond().getHeight() * imageList.get(0).getSecond().getWidth())
+                / (nTiles * nTiles);
+        try(BufferedWriter bf = new BufferedWriter(new FileWriter(name))) {
+            bf.write(Integer.toString(gop) + " " + Integer.toString(nTiles) + "\n");
+            for(Tile tile : this.tileList) {
+                if(tile.getCoordX() != -1 && tile.getCoordY() != -1) {
+                    bf.write(frame + " " + tile.getId() + " " + tile.getCoordX() + " " + tile.getCoordY() +"\n");
+                }
+                count++;
+
+                if(count == tilesXframe) {
+                    count = 0;
+                    frame++;
+                }
+
             }
-            writer.flush();
-            writer.close();
+
+            bf.flush();
+            bf.close();
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -226,13 +256,19 @@ public class Codifier {
     }
     private BufferedImage setColorPFrame(ArrayList<Tile> tiles, BufferedImage pFrame) {
         BufferedImage result = pFrame;
+        Color color = getAverageColor(pFrame);
         tiles.forEach((tile) -> {
+            int imageX = tile.getX();
+            int imageY = tile.getY();
             int x = tile.getCoordX();
             int y = tile.getCoordY();
+            //System.out.println("imageX: " + imageX + " x: " + x);
+            //System.out.println("imageY: " + imageY + " y: " + y);
             if (x != -1 && y != -1) {
-                Color color = getAverageColor(tile.getTile());
-                for(int xCoord = x; xCoord < (x+height); xCoord++) {
-                    for (int yCoord = y; yCoord < (y+width); yCoord++) {
+                for(int xCoord = imageY; xCoord < (imageY+height); xCoord++) {
+                    for (int yCoord = imageX; yCoord < (imageX+width); yCoord++) {
+                        //System.out.println("IMAGE: " + pFrame.getWidth() + "Y: " + pFrame.getHeight());
+                        //System.out.println("X: " + xCoord + "Y: " + yCoord);
                         result.setRGB(yCoord, xCoord, color.getRGB());
                     }
                 }
