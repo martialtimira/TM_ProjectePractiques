@@ -114,17 +114,21 @@ public class Codifier {
         int counter = 0, counterY = 0, counterX = 0;
         //System.out.println("IMAGE DIMENSIONS: x = " + image.getWidth() + " y = " + image.getHeight());
         //System.out.println("TILE SIZE: " + this.nTiles);
-        for (float y = 0; y < (image.getHeight() - this.height); y += this.height) {
-            for(float x = 0; x < (image.getWidth() - this.width); x += this.width) {
+        for (float y = 0; y < image.getHeight(); y += this.height) {
+            for(float x = 0; x < image.getWidth(); x += this.width) {
                 x = Math.round(x);
                 y = Math.round(y);
-                tile = new Tile(image.getSubimage((int)x, (int)y, this.width, this.height), counter);
-                tile.setX((int)x);
-                tile.setY((int)y);
-                tiles.add(tile);
-                counter++;
+                if(x+this.height <= image.getWidth() && y+this.width <= image.getHeight()){
+                    tile = new Tile(image.getSubimage((int)x, (int)y, this.width, this.height), counter);
+                    tile.setX((int)x);
+                    tile.setY((int)y);
+                    tiles.add(tile);
+                    counter++;
+                }
             }
-            counterY++;
+            if(y+this.width <= image.getHeight()) {
+                counterY++;
+            }
         }
 
         counterX = counter/counterY;
@@ -200,14 +204,28 @@ public class Codifier {
     }
 
     private void createCoordFile() {
-        try {
-            String name = "Compressed/coords.txt";
-            BufferedWriter writer = new BufferedWriter(new FileWriter(name));
-            for(Tile tile: this.tileList) {
-                writer.write(tile.getId() + " " + tile.getCoordX() + " " + tile.getCoordY() + "\n");
+        String name = "Compressed/coords.txt";
+        int frame = 1, count = 0;
+        int tilesXframe = (imageList.get(0).getSecond().getHeight() * imageList.get(0).getSecond().getWidth())
+                / (nTiles * nTiles);
+        try(BufferedWriter bf = new BufferedWriter(new FileWriter(name))) {
+            bf.write(Integer.toString(gop) + " " + Integer.toString(nTiles) + "\n");
+            for(Tile tile : this.tileList) {
+                if(tile.getCoordX() != -1 && tile.getCoordY() != -1) {
+                    bf.write(frame + " " + tile.getId() + " " + tile.getCoordX() + " " + tile.getCoordY() +"\n");
+                }
+                count++;
+
+                if(count == tilesXframe) {
+                    count = 0;
+                    frame++;
+                }
+
             }
-            writer.flush();
-            writer.close();
+
+            bf.flush();
+            bf.close();
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
