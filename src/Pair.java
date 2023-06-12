@@ -1,9 +1,17 @@
 import java.awt.image.BufferedImage;
 
+/**
+ * Classe per tenir un objecte amb 2 elements de diferents tipus.
+ */
 public class Pair {
     private String first;
     private BufferedImage second;
 
+    /**
+     * Constructor
+     * @param first primer element.
+     * @param second segon element.
+     */
     public Pair(String first, BufferedImage second) {
         this.first = first;
         this.second = second;

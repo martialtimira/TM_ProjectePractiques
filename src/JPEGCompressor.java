@@ -9,6 +9,14 @@ import java.util.Iterator;
 
 public class JPEGCompressor {
 
+    /**
+     * Compressor JPEG.
+     * @param image imatge a comprimir.
+     * @param name nom del directori.
+     * @param outputIName nom de la imatge a ser guardada.
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
     public static void compress(BufferedImage image, String name, String outputIName) throws FileNotFoundException, IOException {
 
         File compressedImageFile = new File(name + "/" + outputIName);

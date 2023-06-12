@@ -166,7 +166,7 @@ public class Main {
     /**
      * On comença l'execució de la funcionalitat principal del programa, un còdec de video.
      * @throws IOException
-     *         Lectura de fitxers TODO definir i actualitzar això
+     *         Lectura de fitxers
      */
     void run() throws IOException {
         visor = null;
@@ -215,6 +215,10 @@ public class Main {
         }
     }
 
+    /**
+     * Funció per mostrar les imatges al visor, sense que hi hagi una descompressió.
+     * @param timer timer per poder controlar els FPS.
+     */
     public void playNotDecode(Timer timer) {
         TimerTask task = new TimerTask() {
             @Override

@@ -1,9 +1,3 @@
-/* TODO enlloc de dividir el quadre desti en teseles regulars i buscar
-    coincidencies al quadre origen, ferho al reves.
-    Primer dividir el quadre origen en teseles qudriculades i despres
-    buscar coincidencies al quadre desti.
- */
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -82,6 +76,10 @@ public class Codifier {
         }
     }
 
+    /**
+     * Itera tots els frames de cada GOP, divideix els frames amb tessel·les i busca les similars al frame de
+     * referència.
+     */
     private void iterateGOP() {
         progressBar pb = new progressBar(gopListList.size());
         ImageFrame n, n_1;
@@ -89,7 +87,6 @@ public class Codifier {
             ArrayList<ImageFrame> currentGOPList = gopListList.get(p);
             n = currentGOPList.get(0);
             this.compressedFrameList.add(n);
-            //System.out.println("Base image ID: " + n.getId());
             for(int z = 1; z < currentGOPList.size(); z++) {
                 n_1 = currentGOPList.get(z);
 
@@ -106,14 +103,17 @@ public class Codifier {
         System.out.println("DONE");
     }
 
+    /**
+     * Divideix el frame en tessel·les.
+     * @param image imatge a dividir.
+     * @return llista amb les tessel·les de la imatge.
+     */
     private ArrayList<Tile> subdivideImageTiles(BufferedImage image) {
         ArrayList<Tile> tiles = new ArrayList<>();
 
         Tile tile;
 
         int counter = 0, counterY = 0, counterX = 0;
-        //System.out.println("IMAGE DIMENSIONS: x = " + image.getWidth() + " y = " + image.getHeight());
-        //System.out.println("TILE SIZE: " + this.nTiles);
         for (float y = 0; y < image.getHeight(); y += this.height) {
             for(float x = 0; x < image.getWidth(); x += this.width) {
                 x = Math.round(x);
@@ -134,12 +134,15 @@ public class Codifier {
         counterX = counter/counterY;
         this.nTilesX = counterX;
         this.nTilesY = counterY;
-        //System.out.println("TOTAL Tiles Generated: " + counter);
-        //System.out.println("XTiles: " + counterX);
-        //System.out.println("YTiles: " + counterY);
         return tiles;
     }
 
+    /**
+     * Busca les al frame de referència les tessel·les de l'iframe.
+     * @param iFrame frame que ha de ser comprimit.
+     * @param pFrame frame de referència.
+     * @return Llista amb les tessel·les que s'han trobat el pframe.
+     */
     private ArrayList<Tile> findEqualTiles(ImageFrame iFrame, BufferedImage pFrame) {
         float maxPSNR;
         int xMaxValue = 0;
@@ -186,6 +189,12 @@ public class Codifier {
         return resultTiles;
     }
 
+    /**
+     * Calcula el psnr per determinar si dues tessel·les són prou similars.
+     * @param tile Tessel·la a calcular el psnr.
+     * @param pFrame Frame de referència.
+     * @return Coeficient del psnr.
+     */
     private float getPSNRScore(Tile tile, BufferedImage pFrame) {
         float noise = 0, mse, psnr;
         BufferedImage iFrame = tile.getTile();
@@ -203,6 +212,10 @@ public class Codifier {
         return psnr;
     }
 
+    /**
+     * Crea el fitxer amb les coordenades de les tessel·les que han estat substituïdes i on es poden trobar al frame
+     * de referència.
+     */
     private void createCoordFile() {
         String name = "Compressed/coords.txt";
         int frame = 1, count = 0;
@@ -231,6 +244,11 @@ public class Codifier {
         }
     }
 
+    /**
+     * Calcula el color mitjà d'una imatge.
+     * @param image imatge a calcular el color mitjà.
+     * @return color mitjà de la imatge.
+     */
     private Color getAverageColor(BufferedImage image) {
         Color color;
         int sumR = 0;
@@ -254,6 +272,14 @@ public class Codifier {
 
         return new Color(red, green, blue);
     }
+
+    /**
+     * Elimina les tessel·les de la imatge, per fer-ho, pinta l'espai que
+     * ocupen amb el color mitjà del frame.
+     * @param tiles tessel·les a eliminar.
+     * @param pFrame frame d'on s'han d'eliminar les tessel·les.
+     * @return imatge amb els espais de les tessel·les ocupats pel color mitjà.
+     */
     private BufferedImage setColorPFrame(ArrayList<Tile> tiles, BufferedImage pFrame) {
         BufferedImage result = pFrame;
         Color color = getAverageColor(pFrame);
@@ -262,13 +288,9 @@ public class Codifier {
             int imageY = tile.getY();
             int x = tile.getCoordX();
             int y = tile.getCoordY();
-            //System.out.println("imageX: " + imageX + " x: " + x);
-            //System.out.println("imageY: " + imageY + " y: " + y);
             if (x != -1 && y != -1) {
                 for(int xCoord = imageY; xCoord < (imageY+height); xCoord++) {
                     for (int yCoord = imageX; yCoord < (imageX+width); yCoord++) {
-                        //System.out.println("IMAGE: " + pFrame.getWidth() + "Y: " + pFrame.getHeight());
-                        //System.out.println("X: " + xCoord + "Y: " + yCoord);
                         result.setRGB(yCoord, xCoord, color.getRGB());
                     }
                 }
@@ -291,7 +313,7 @@ public class Codifier {
     }
 
     /**
-     * Guarda en un ZIP el fitxer de coordenades i les imatges codificades
+     * Guarda en un ZIP el fitxer de coordenades i les imatges codificades.
      */
     private void saveZip() {
         new File("Compressed").mkdirs();

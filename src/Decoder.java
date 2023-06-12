@@ -40,6 +40,11 @@ public class Decoder {
     private final boolean verbose;
     private final Utils utils;
 
+    /**
+     * Constructor del decodificador
+     * @param mainArgs Arguments d'entrada de l'execució del codi.
+     * @param visor finestra on es mostrarà la imatge.
+     */
     public Decoder(MainCLIParameters mainArgs, Visor visor) {
         this.outputPath = mainArgs.getOutputPath();
         this.inputPath = mainArgs.getInputPath().toString();
@@ -67,6 +72,10 @@ public class Decoder {
         this.yCoordsListList = new ArrayList<>();
     }
 
+    /**
+     * Funció per començar el procés de decodificar la imatge.
+     * @return Llista amb totes les imatges descomprimides.
+     */
     public ArrayList<Pair> decode() {
         System.out.println("DECODING");
         this.readZIP();
@@ -127,6 +136,9 @@ public class Decoder {
         return this.pairList;
     }
 
+    /**
+     * Funció per reproduir les imatges dins del visor.
+     */
     public void reproduceImages() {
         if (reproCounter < this.images.size()) {
             BufferedImage image = this.images.get(reproCounter);
@@ -152,18 +164,26 @@ public class Decoder {
             }
         }
     }
+
+    /**
+     * Funció per descomprimir les imatges a partir de les dades que tenim del fitxer de 
+     * i els frames de referència.
+     */
     private void buildImages() {
         this.tileWidth = nTiles;
         this.tileHeight = nTiles;
         BufferedImage iFrame = null;
-        int idMultiplier = 0;
         int counter = 0;
         for(int i = 0; i < this.images.size(); i++) {
             BufferedImage currentFrame = this.images.get(i);
             if (i % this.gop == 0) {
                 iFrame = currentFrame;
             } else {
-                this.buildPframes(iFrame, currentFrame, this.idsListList.get(counter), this.xCoordsListList.get(counter), this.yCoordsListList.get(counter));
+                this.buildPframes(iFrame, 
+                        currentFrame, 
+                        this.idsListList.get(counter), 
+                        this.xCoordsListList.get(counter), 
+                        this.yCoordsListList.get(counter));
                 counter++;
             }
         }
@@ -171,13 +191,18 @@ public class Decoder {
         System.out.println("FINAL COUNTER: " + counter);
     }
 
+    /**
+     * Funció per substituir les tessel·less buides del frame comprimit amb les equivalents del frame de referència.
+     * @param iFrame frame que ha de ser construït.
+     * @param pFrame frame de referència.
+     * @param idList llista amb els identificadors de les tessel·les que han de ser substituïdes.
+     * @param xCoordList llista amb les coordenades de l'eix X equivalents a les tessel·les al frame de referència.
+     * @param yCoordList llista amb les coordenades de l'eix Y equivalents a les tessel·les al frame de referència.
+     */
     private void buildPframes(BufferedImage iFrame, BufferedImage pFrame, ArrayList<Integer> idList, ArrayList<Integer> xCoordList, ArrayList<Integer> yCoordList) {
         ArrayList<Tile> tiles = generateMacroBlocks(pFrame);
-        //System.out.println("TILES: " + tiles.size());
-        //System.out.println("IDLISTSIZE: " + idList.size());
         int tileID, x, y;
         for(int i = 0; i < idList.size(); i++) {
-            //System.out.println("CURRENT TILE ID: " + idList.get(i));
             //get tile, xcoords, and ycoords, and then do the same as the old method
             tileID = idList.get(i);
             x = xCoordList.get(i);
@@ -185,9 +210,6 @@ public class Decoder {
             Tile tile = tiles.get(tileID);
             for(int j = 0; j < this.tileHeight; j++) {
                 for(int k = 0; k < this.tileWidth; k++) {
-                    //System.out.println("IFrameDimensions: (" + iFrame.getWidth() + ", " + iFrame.getHeight() + ")");
-                    //System.out.println("GETTING RGB FROM (" + (x+k) + ", " + (y+j) + ") on IFrame");
-                    //System.out.println("Putting it in (" + (tile.getX()+k) + ", " + (tile.getY()+j) + ") on pFrame");
                     int rgb = iFrame.getRGB(y+j, x+k);
                     pFrame.setRGB((tile.getX()+k), (tile.getY()+j), rgb);
                 }
@@ -195,10 +217,15 @@ public class Decoder {
         }
     }
 
+    /**
+     * Divideix la imatge amb tessel·les.
+     * @param image imatge a dividir.
+     * @return llista dmb les tessel·les de la imatge.
+     */
     private ArrayList<Tile> generateMacroBlocks(BufferedImage image) {
         ArrayList<Tile> tiles = new ArrayList<>();
         Tile tile;
-        int count = 0, counterY = 0;
+        int count = 0;
         for(int y = 0; y < image.getHeight(); y += this.tileHeight) {
             for(int x = 0; x < image.getWidth(); x += this.tileWidth) {
                 if(x+this.tileHeight <= image.getWidth() && y+this.tileWidth <= image.getHeight()) {
@@ -209,14 +236,13 @@ public class Decoder {
                     count++;
                 }
             }
-
-            if(y+this.tileWidth <= image.getHeight()) {
-                counterY++;
-            }
         }
         return tiles;
     }
 
+    /**
+     * Llegeix el fitxer zip on es troben les imatges i el fitxer de coordenades.
+     */
     private void readZIP() {
         try {
             File file = new File(inputPath);
@@ -228,7 +254,6 @@ public class Decoder {
                 ZipEntry entry = entries.nextElement();
                 String name = entry.getName();
                 if(name.equalsIgnoreCase("Compressed/coords.txt")) {
-                    // TODO read this binary
                     BufferedReader reader = new BufferedReader(new InputStreamReader(zipFile.getInputStream(entry)));
                     String line;
                     line = reader.readLine();

@@ -4,6 +4,12 @@ import java.util.zip.ZipOutputStream;
 
 public class Utils {
 
+    /**
+     * Afegeix un fitxer al zip output stream.
+     * @param path camí del fitxer.
+     * @param srcFile fitxer a afegir.
+     * @param zos zip output stream.
+     */
     public void addFile(String path, String srcFile, ZipOutputStream zos) {
         File folder = new File(srcFile);
         if(folder.isDirectory()) {
@@ -26,6 +32,13 @@ public class Utils {
             }
         }
     }
+
+    /**
+     * Afegeix un directori al zip output stream.
+     * @param path camí del directori.
+     * @param srcFolder directori a afegir.
+     * @param zos zip output stream.
+     */
     public void addDirectory(String path, String srcFolder, ZipOutputStream zos) {
         File folder = new File(srcFolder);
 
@@ -38,6 +51,11 @@ public class Utils {
         }
     }
 
+    /**
+     * Elimina un directori.
+     * @param directory directori a eliminar.
+     * @return boolean, true si el directori s'ha eliminat, false si no s'ha eliminat.
+     */
     public boolean deleteDirectory(File directory) {
         if (directory.isDirectory()) {
             String[] files = directory.list();
@@ -51,6 +69,11 @@ public class Utils {
         return directory.delete();
     }
 
+    /**
+     * Crea un fitxer zip.
+     * @param srcFolder directori a colocar dins el zip.
+     * @param destinationZipFile directori on es trobarà el fitxer zip.
+     */
     public void createZipFolder(String srcFolder, String destinationZipFile) {
         try {
             ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(destinationZipFile));
@@ -67,6 +90,12 @@ public class Utils {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * Converteix la mida del fitxer en bits a una magnitud llegible (KB, MB, GB...)
+     * @param fileSize mida del fitxer en bits.
+     * @return String amb el valor i la magnitud apropiada.
+     */
     public static String formatFileSize(long fileSize) {
         String[] units = {"B", "KB", "MB", "GB", "TB"};
         int unitIndex = 0;

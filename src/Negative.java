@@ -2,6 +2,10 @@ import java.awt.image.BufferedImage;
 
 public class Negative {
 
+    /**
+     * Aplica un filtre negatiu a la imatge.
+     * @param image imatge a la qual se li aplicarà el filtre negatiu.
+     */
     public static void applyNegativeFilter(BufferedImage image) {
 
         int width = image.getWidth();
